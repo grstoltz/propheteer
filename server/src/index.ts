@@ -20,9 +20,18 @@ import {
 	validateAnalyticsSubmission,
 	validatePropertiesSubmission,
 	validateViewsSubmission,
+	validateCsvSubmission,
 } from "../utils/validateSubmission";
 
-const upload = multer();
+const upload = multer({
+	fileFilter: (_, file, cb) => {
+		if (file.mimetype == "text/csv") {
+			cb(null, true);
+		} else {
+			return cb(null, false);
+		}
+	},
+});
 
 const googleAccounts = google.analytics("v3");
 const googleAnalytics = google.analyticsreporting("v4");
@@ -303,32 +312,69 @@ const main = async () => {
 		}
 	);
 
-	app.post("/csv/data", upload.single("file"), async (req, res) => {
-		const file = req.file.buffer.toString("utf8");
-		const { period } = req.body;
+	app.post(
+		"/csv/data",
+		[upload.single("file"), validateCsvSubmission],
+		async (req: any, res: any) => {
+			if (
+				!req.file ||
+				req.file.fieldname !== "file" ||
+				req.file.mimetype !== "text/csv"
+			) {
+				res.send({
+					errors: [
+						{
+							field: "file",
+							message: "File must be a csv",
+						},
+					],
+				});
+				return;
+			}
+			const file = req.file.buffer.toString("utf8");
+			const { period } = req.body;
 
-		const { data: csvArr } = papa.parse(file, {
-			header: true,
-			skipEmptyLines: true,
-		});
+			const { data: csvArr } = papa.parse(file, {
+				header: true,
+				skipEmptyLines: true,
+			});
 
-		csvArr.forEach((value: unknown) => {
-			//@ts-ignore
-			delete value[""];
-			//@ts-ignore
+			csvArr.forEach((value: unknown) => {
+				//@ts-ignore
+				delete value[""];
+				//@ts-ignore
 
-			value.y = value.trend;
-			//@ts-ignore
+				value.y = value.trend;
+				//@ts-ignore
 
-			delete value.trend;
-		});
+				delete value.trend;
+			});
 
-		const forecastResults = await forecast(csvArr, period);
-		res.send({
-			forecast: forecastResults,
-			actual: csvArr,
-		});
-	});
+			try {
+				const forecastResults = await forecast(csvArr, period);
+				res.send({
+					forecast: forecastResults,
+					actual: csvArr,
+				});
+			} catch (e) {
+				let message = "There was an error parsing your CSV file";
+
+				if (e.message === "KeyError") {
+					message =
+						"Please ensure your date is in YYYY-MM-DD format and in the leftmost column";
+				}
+
+				res.send({
+					errors: [
+						{
+							field: "file",
+							message,
+						},
+					],
+				});
+			}
+		}
+	);
 
 	app.get("/success", proxy("http://localhost:3000"));
 
@@ -349,7 +395,7 @@ const main = async () => {
 			// });
 			return pythonResponse.data;
 		} catch (e) {
-			console.log(e);
+			throw new Error(e.response.data);
 		}
 	};
 

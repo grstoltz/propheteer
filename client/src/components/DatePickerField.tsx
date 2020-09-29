@@ -1,5 +1,5 @@
 import React, { ChangeEvent, InputHTMLAttributes } from "react";
-import { FormErrorMessage, FormLabel } from "@chakra-ui/core";
+import { FormControl, FormErrorMessage, FormLabel } from "@chakra-ui/core";
 import { useField, useFormikContext } from "formik";
 import DatePicker from "react-datepicker";
 
@@ -32,7 +32,7 @@ export const DatePickerField: React.FC<DatePickerFieldProps> = ({
 		return [year, month, day].join("-");
 	};
 	return (
-		<>
+		<FormControl isInvalid={!!error}>
 			<FormLabel htmlFor={field.name}>{props.label}</FormLabel>
 			<DatePicker
 				{...field}
@@ -44,6 +44,6 @@ export const DatePickerField: React.FC<DatePickerFieldProps> = ({
 				}}
 			/>
 			{error ? <FormErrorMessage>{error}</FormErrorMessage> : null}
-		</>
+		</FormControl>
 	);
 };

@@ -39,6 +39,20 @@ const Chart = (props: ChartProps) => {
 	);
 
 	const data = {
+		labels: [
+			"2020-01-01",
+			"2020-02-01",
+			"2020-03-01",
+			"2020-04-01",
+			"2020-05,01",
+			"2020-06-01",
+			"2020-07-01",
+			"2020-08-01",
+			"2020-09-01",
+			"2020-10-01",
+			"2020-11-01",
+			"2020-12-01",
+		],
 		datasets: [
 			{
 				label: "Actual",
@@ -46,7 +60,7 @@ const Chart = (props: ChartProps) => {
 				fill: false,
 				pointRadius: 2,
 				backgroundColor: "rgba(0, 0, 0, 0.5)",
-				borderColor: "rgba(0, 0, 0, 0.0)",
+				borderColor: "black",
 				borderWidth: 1,
 			},
 			{

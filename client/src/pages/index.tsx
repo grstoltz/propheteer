@@ -10,7 +10,7 @@ import {
 	TabPanel,
 } from "@chakra-ui/core";
 import { CSVLink } from "react-csv";
-import { Formik, Form } from "formik";
+import { Formik, Form, FormikErrors } from "formik";
 import axios from "axios";
 import useAsyncEffect from "use-async-effect";
 import { Layout } from "../components/Layout";
@@ -147,7 +147,15 @@ const Index = () => {
 		}
 	};
 
-	const handleCSVSubmit = async (values: { file: File; period: number }) => {
+	const handleCSVSubmit = async (
+		values: { file: File; period: number },
+		setErrors: (
+			errors: FormikErrors<{
+				file: null;
+				period: number;
+			}>
+		) => void
+	) => {
 		const file = values.file;
 		const period = values.period.toString();
 
@@ -155,14 +163,17 @@ const Index = () => {
 		fd.append("file", file);
 		fd.append("period", period);
 
-		const result = await axios.post("http://localhost:4000/csv/data", fd, {
+		const response = await axios.post("http://localhost:4000/csv/data", fd, {
 			headers: {
 				"content-type": "multipart/form-data",
 			},
 		});
-		if (result.data.forecast.length && result.data.actual.length) {
-			setForecastData(result.data.forecast);
-			setActualData(result.data.actual);
+
+		if (response.data?.errors) {
+			setErrors(toErrorMap(response.data.errors));
+		} else if (response.data.forecast.length && response.data.actual.length) {
+			setForecastData(response.data.forecast);
+			setActualData(response.data.actual);
 		}
 	};
 

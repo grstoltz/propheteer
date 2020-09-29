@@ -7,7 +7,8 @@ import { Formik, Form } from "formik";
 
 import { InputField } from "./InputField";
 interface CSVFormProps {
-	handleSubmit: (values: { file: File | null; period: number }) => void;
+	handleSubmit: (...args: any) => void;
+
 	forecastData: object[];
 }
 
@@ -19,7 +20,7 @@ export const CSVForm: React.FC<CSVFormProps> = ({ ...props }) => {
 				file: null,
 				period: 365,
 			}}
-			onSubmit={(values) => handleSubmit(values)}
+			onSubmit={(values, { setErrors }) => handleSubmit(values, setErrors)}
 		>
 			{(props) => {
 				const {
