@@ -106,7 +106,7 @@ const main = async () => {
 				//res.cookie("google-auth", new Date());
 				res.redirect("http://localhost:3000");
 			} else {
-				console.log("Error: " + err);
+				throw new Error("Error: " + err);
 			}
 		});
 	});
