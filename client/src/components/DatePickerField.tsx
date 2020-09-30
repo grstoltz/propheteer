@@ -1,12 +1,12 @@
-import React, { ChangeEvent, InputHTMLAttributes } from "react";
+import * as React from "react";
 import { FormControl, FormErrorMessage, FormLabel } from "@chakra-ui/core";
 import { useField, useFormikContext } from "formik";
 import DatePicker from "react-datepicker";
 
-type DatePickerFieldProps = InputHTMLAttributes<HTMLInputElement> & {
+type DatePickerFieldProps = React.InputHTMLAttributes<HTMLInputElement> & {
 	label: string;
 	name: string;
-	onChange: ((event: ChangeEvent<HTMLInputElement>) => void) &
+	onChange: ((event: React.ChangeEvent<HTMLInputElement>) => void) &
 		((
 			field: string,
 			value: any,

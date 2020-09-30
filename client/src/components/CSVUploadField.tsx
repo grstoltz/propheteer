@@ -1,4 +1,4 @@
-import React, { InputHTMLAttributes } from "react";
+import * as React from "react";
 import { useField, useFormikContext } from "formik";
 import {
 	FormControl,
@@ -7,7 +7,7 @@ import {
 	FormErrorMessage,
 } from "@chakra-ui/core";
 
-type CSVUploadFieldProps = InputHTMLAttributes<HTMLInputElement> & {
+type CSVUploadFieldProps = React.InputHTMLAttributes<HTMLInputElement> & {
 	label: string;
 	name: string;
 	value: File;

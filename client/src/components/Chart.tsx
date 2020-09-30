@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { Scatter } from "react-chartjs-2";
 
 interface actualData {
@@ -6,10 +6,10 @@ interface actualData {
 	y: string;
 }
 
-interface forecastData {
-	ds: string;
-	trend: string;
-}
+// interface forecastData {
+// 	ds: string;
+// 	trend: string;
+// }
 
 interface ChartProps {
 	forecastData?: object[];
@@ -21,7 +21,7 @@ const Chart = (props: ChartProps) => {
 	const { actualData, forecastData } = props;
 
 	const forecastDataArr: object[] | undefined = forecastData?.map(
-		(row: forecastData) => {
+		(row: any) => {
 			return {
 				x: row.ds,
 				y: row.trend,

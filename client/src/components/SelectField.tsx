@@ -1,4 +1,4 @@
-import React, { ChangeEvent, InputHTMLAttributes } from "react";
+import * as React from "react";
 import { FormControl, FormLabel, Select } from "@chakra-ui/core";
 
 interface Option {
@@ -8,14 +8,14 @@ interface Option {
 	uiName?: number;
 }
 
-type SelectFieldProps = InputHTMLAttributes<HTMLInputElement> & {
+type SelectFieldProps = React.InputHTMLAttributes<HTMLInputElement> & {
 	id: string;
 	label: string;
 	name: string;
 	value: string;
 	options: Option[];
 	isDisabled?: boolean | undefined;
-	onChange: ((event: ChangeEvent<HTMLInputElement>) => void) &
+	onChange: ((event: React.ChangeEvent<HTMLInputElement>) => void) &
 		((
 			field: string,
 			value: any,

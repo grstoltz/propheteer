@@ -15,6 +15,7 @@ import cors from "cors";
 import { google } from "googleapis";
 import * as _ from "lodash";
 import papa from "papaparse";
+import path from "path";
 
 import {
 	validateAnalyticsSubmission,
@@ -53,6 +54,8 @@ const url = oauth2Client.generateAuthUrl({
 const main = async () => {
 	const app = express();
 
+	app.use(express.static(path.join(__dirname, "build")));
+
 	const RedisStore = connectRedis(session);
 	const redis = new Redis(process.env.REDIS_URL);
 	app.use(
@@ -72,10 +75,10 @@ const main = async () => {
 	app.use(
 		session({
 			name: COOKIE_NAME,
-			store: new RedisStore({
-				client: redis,
-				disableTouch: true,
-			}),
+			// store: new RedisStore({
+			// 	client: redis,
+			// 	disableTouch: true,
+			// }),
 			cookie: {
 				maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 years
 				httpOnly: true,
@@ -103,7 +106,10 @@ const main = async () => {
 				oauth2Client.setCredentials({
 					access_token: tokens?.access_token,
 				});
-				//res.cookie("google-auth", new Date());
+				if (process.env.NODE_ENV === "production") {
+					res.redirect("/");
+					return;
+				}
 				res.redirect("http://localhost:3000");
 			} else {
 				throw new Error("Error: " + err);
@@ -113,7 +119,15 @@ const main = async () => {
 
 	app.get("/analytics/accounts", (req, res) => {
 		if (!req.session?.token) {
-			throw new Error("Not Authenticated");
+			res.send({
+				errors: [
+					{
+						field: "account",
+						error: "Not Authenticated",
+					},
+				],
+			});
+			return;
 		}
 		oauth2Client.setCredentials({
 			access_token: req.session?.token,
@@ -398,6 +412,14 @@ const main = async () => {
 			throw new Error(e.response.data);
 		}
 	};
+
+	if (process.env.NODE_ENV === "production") {
+		app.get("*", function (req, res) {
+			res.sendFile(
+				path.join(__dirname, "/../../../client/", "build", "index.html")
+			);
+		});
+	}
 
 	app.listen(4000, () => {
 		console.log("Server started at http://localhost:4000");

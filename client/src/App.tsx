@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import * as React from "react";
 import {
 	Link,
 	Box,
@@ -13,16 +13,18 @@ import { CSVLink } from "react-csv";
 import { Formik, Form, FormikErrors } from "formik";
 import axios from "axios";
 import useAsyncEffect from "use-async-effect";
-import { Layout } from "../components/Layout";
-import Chart from "src/components/Chart";
+import { Layout } from "./components/Layout";
+import Chart from "./components/Chart";
 
-import { CSVForm } from "../components/CSVForm";
-import { SelectField } from "../components/SelectField";
-import { InputField } from "src/components/InputField";
-import { DatePickerField } from "../components/DatePickerField";
-import { toErrorMap } from "src/utils/toErrorMap";
+import { CSVForm } from "./components/CSVForm";
+import { SelectField } from "./components/SelectField";
+import { InputField } from "./components/InputField";
+import { DatePickerField } from "./components/DatePickerField";
+import { toErrorMap } from "./utils/toErrorMap";
 
-const Index = () => {
+const { useState } = React;
+
+const App = () => {
 	const [accounts, setAccounts] = useState([]);
 	const [properties, setProperties] = useState([]);
 	const [views, setViews] = useState([]);
@@ -50,15 +52,14 @@ const Index = () => {
 	}, []);
 
 	const getAccounts = () => {
-		return axios.get("http://localhost:4000/analytics/accounts", {
+		return axios.get(`/analytics/accounts`, {
 			withCredentials: true,
 		});
 	};
 
 	const getProperties = (accountId: string) => {
-		console.log(accountId);
 		return axios.post(
-			"http://localhost:4000/analytics/properties",
+			`/analytics/properties`,
 			{
 				accountId,
 			},
@@ -73,7 +74,7 @@ const Index = () => {
 		console.log("Property", propertyId);
 
 		return axios.post(
-			`http://localhost:4000/analytics/views`,
+			`/analytics/views`,
 			{
 				accountId,
 				propertyId,
@@ -85,7 +86,7 @@ const Index = () => {
 	};
 
 	const getMetrics = () => {
-		return axios.get(`http://localhost:4000/analytics/metrics`, {
+		return axios.get(`/analytics/metrics`, {
 			withCredentials: true,
 		});
 	};
@@ -163,7 +164,7 @@ const Index = () => {
 		fd.append("file", file);
 		fd.append("period", period);
 
-		const response = await axios.post("http://localhost:4000/csv/data", fd, {
+		const response = await axios.post(`/csv/data`, fd, {
 			headers: {
 				"content-type": "multipart/form-data",
 			},
@@ -230,7 +231,7 @@ const Index = () => {
 									};
 									console.log("postobj", postObj);
 									const response = await axios.post(
-										"http://localhost:4000/analytics/data",
+										`/analytics/data`,
 										postObj,
 										{
 											withCredentials: true,
@@ -394,7 +395,9 @@ const Index = () => {
 													</CSVLink>
 												) : null}
 												{authorized ? null : (
-													<Link href="http://localhost:4000/auth/google">
+													<Link
+														href={`http://localhost:4000/auth/google`}
+													>
 														<Button ml={4} as={Link}>
 															Login to Google Analytics
 														</Button>
@@ -422,4 +425,4 @@ const Index = () => {
 	);
 };
 
-export default Index;
+export default App;
