@@ -395,9 +395,7 @@ const App = () => {
 													</CSVLink>
 												) : null}
 												{authorized ? null : (
-													<Link
-														href={`http://localhost:4000/auth/google`}
-													>
+													<Link href={`/auth/google`}>
 														<Button ml={4} as={Link}>
 															Login to Google Analytics
 														</Button>

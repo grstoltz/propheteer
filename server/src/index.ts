@@ -6,11 +6,10 @@ import { __prod__, COOKIE_NAME } from "./constants";
 import express from "express";
 import axios, { AxiosResponse } from "axios";
 import session from "express-session";
-import proxy from "express-http-proxy";
-import * as bodyParser from "body-parser";
-import multer from "multer";
 import Redis from "ioredis";
 import connectRedis from "connect-redis";
+import * as bodyParser from "body-parser";
+import multer from "multer";
 import cors from "cors";
 import { google } from "googleapis";
 import * as _ from "lodash";
@@ -39,7 +38,7 @@ const googleAnalytics = google.analyticsreporting("v4");
 
 const clientID = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
-const callbackURL = "http://localhost:4000/login/google/return";
+const callbackURL = "http://localhost/login/google/return";
 const oauth2Client = new google.auth.OAuth2(
 	clientID,
 	clientSecret,
@@ -54,10 +53,11 @@ const url = oauth2Client.generateAuthUrl({
 const main = async () => {
 	const app = express();
 
-	app.use(express.static(path.join(__dirname, "build")));
+	app.use(express.static(path.join(__dirname, "../../../client/", "build")));
 
 	const RedisStore = connectRedis(session);
 	const redis = new Redis(process.env.REDIS_URL);
+
 	app.use(
 		bodyParser.urlencoded({
 			extended: false,
@@ -75,16 +75,16 @@ const main = async () => {
 	app.use(
 		session({
 			name: COOKIE_NAME,
-			// store: new RedisStore({
-			// 	client: redis,
-			// 	disableTouch: true,
-			// }),
+			store: new RedisStore({
+				client: redis,
+				disableTouch: true,
+			}),
 			cookie: {
 				maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 years
 				httpOnly: true,
 				sameSite: "lax", // csrf
-				secure: __prod__, // cookie only works in https
-				domain: __prod__ ? ".codeponder.com" : undefined,
+				//secure: __prod__, // cookie only works in https
+				//domain: __prod__ ? ".codeponder.com" : undefined,
 			},
 			saveUninitialized: false,
 			secret: process.env.SESSION_SECRET as string,
@@ -118,6 +118,8 @@ const main = async () => {
 	});
 
 	app.get("/analytics/accounts", (req, res) => {
+		console.log(req.session);
+
 		if (!req.session?.token) {
 			res.send({
 				errors: [
@@ -297,7 +299,9 @@ const main = async () => {
 					if (err) {
 						console.error("Error: " + err);
 						res.send("An error occurred");
+						return;
 					} else if (data) {
+						console.log(data);
 						const googleResultsArr = data.data.reports[0].data.rows.map(
 							(row: any) => {
 								const data = row.dimensions[0].replace(
@@ -373,7 +377,7 @@ const main = async () => {
 			} catch (e) {
 				let message = "There was an error parsing your CSV file";
 
-				if (e.message === "KeyError") {
+				if (e.data?.message === "KeyError") {
 					message =
 						"Please ensure your date is in YYYY-MM-DD format and in the leftmost column";
 				}
@@ -390,12 +394,10 @@ const main = async () => {
 		}
 	);
 
-	app.get("/success", proxy("http://localhost:3000"));
-
 	const forecast = async (data: unknown[], period: string) => {
 		try {
 			const pythonResponse: AxiosResponse = await axios.post(
-				"http://127.0.0.1:5000/api/forecast",
+				"http://0.0.0.0:5000/api/forecast",
 				{
 					data,
 					period,
@@ -409,14 +411,14 @@ const main = async () => {
 			// });
 			return pythonResponse.data;
 		} catch (e) {
-			throw new Error(e.response.data);
+			throw new Error(e.response);
 		}
 	};
 
 	if (process.env.NODE_ENV === "production") {
-		app.get("*", function (req, res) {
+		app.get("*", function (_, res) {
 			res.sendFile(
-				path.join(__dirname, "/../../../client/", "build", "index.html")
+				path.join(__dirname, "../../../client/", "build", "index.html")
 			);
 		});
 	}
