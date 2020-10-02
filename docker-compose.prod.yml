@@ -1,4 +1,4 @@
-version: "2"
+version: "2.1"
 services:
    web:
       build: .
@@ -10,5 +10,14 @@ services:
          PORT: 4000
       links:
          - redis:redis
+   flask:
+      build: ./flask
+      ports:
+         - "5000:5000"
+      environment:
+         - FLASK_APP=app.py
+         - FLASK_DEBUG=1
+      restart: always
    redis:
       image: "redis:alpine"
+      restart: always

@@ -24,15 +24,13 @@ def api_forecast():
    
     try:
         body = request.get_json()
-
         
         period = int(body['period'])
         print(period)
 
         print(body['data'])
-
         
-        df = pd.read_json(json.dumps(body['data']), orient="records")
+        df = pd.read_json(json.dumps(body['data']), orient='columns')
 
         df['ds'] = pd.to_datetime(df['ds'], format='%Y-%m-%d').dt.strftime("%Y-%m-%d")
 

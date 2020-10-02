@@ -1,37 +1,37 @@
-flask:
-   restart: on-failure:10
-   build: ./flask
-   expose:
-      - "5000"
-   env_file: .env
-   command: uwsgi --ini /flask-api/uwsgi.ini --async 12 --ugreen
-   container_name: flask
+# flask:
+#    restart: on-failure:10
+#    build: ./flask
+#    expose:
+#       - "5000"
+#    env_file: .env
+#    command: uwsgi --ini /flask-api/uwsgi.ini --async 12 --ugreen
+#    container_name: flask
 
-client:
-   build: ./client
+# client:
+#    build: ./client
 
-node-api:
-   restart: on-failure:10
-   build: ./server
-   expose:
-      - "3000"
-   ports:
-      - "5858:5858"
-   env_file: .env
-   #command: pm2 start /node-api/node-api.json --no-daemon
-   command: node --debug /node-api/bin/node-api.js
-   #command: node-debug /node-api/bin/node-api.js
-   #command: nodemon --debug /node-api/node-api.js --watch /node-api
-   container_name: server
+# node-api:
+#    restart: on-failure:10
+#    build: ./server
+#    expose:
+#       - "3000"
+#    ports:
+#       - "5858:5858"
+#    env_file: .env
+#    #command: pm2 start /node-api/node-api.json --no-daemon
+#    command: node --debug /node-api/bin/node-api.js
+#    #command: node-debug /node-api/bin/node-api.js
+#    #command: nodemon --debug /node-api/node-api.js --watch /node-api
+#    container_name: server
 
-nginx:
-   restart: always
-   build: ./nginx/
-   ports:
-      - "80:80"
-   links:
-      # nginx has to link to flask-api (not vice-versa) so that nginx/sites-enabled/default has access to flask-api by service name (acts as host dns).
-      #  each docker container has a seperate ip address below the docker-machine host, so you have to link containers to correctly pass to upstream flask port
-      - flask-api:flask-api
-      - node-api:node-api
-   container_name: nginx
+# nginx:
+#    restart: always
+#    build: ./nginx/
+#    ports:
+#       - "80:80"
+#    links:
+#       # nginx has to link to flask-api (not vice-versa) so that nginx/sites-enabled/default has access to flask-api by service name (acts as host dns).
+#       #  each docker container has a seperate ip address below the docker-machine host, so you have to link containers to correctly pass to upstream flask port
+#       - flask-api:flask-api
+#       - node-api:node-api
+#    container_name: nginx

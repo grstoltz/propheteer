@@ -38,7 +38,9 @@ const googleAnalytics = google.analyticsreporting("v4");
 
 const clientID = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
-const callbackURL = "http://localhost/login/google/return";
+const callbackURL = __prod__
+	? "http://localhost/login/google/return"
+	: "http://localhost:4000/login/google/return";
 const oauth2Client = new google.auth.OAuth2(
 	clientID,
 	clientSecret,
@@ -92,6 +94,92 @@ const main = async () => {
 		})
 	);
 
+	app.post(
+		"/analytics/data",
+		validateAnalyticsSubmission,
+		async (req: any, res: any) => {
+			console.log("hit");
+			//console.log(req.body);
+			// if (!req.session?.token) {
+			// 	throw new Error("Not Authenticated");
+			// }
+
+			oauth2Client.setCredentials({
+				access_token: req.session?.token,
+			});
+
+			const { viewId, startDate, endDate, metricId, period } = req.body;
+
+			let repReq = [
+				{
+					includeEmptyRows: "true",
+					viewId,
+					dateRanges: [
+						{
+							startDate,
+							endDate,
+						},
+					],
+					metrics: [
+						{
+							expression: metricId,
+						},
+					],
+					dimensions: [
+						{
+							name: "ga:date",
+						},
+					],
+				},
+			];
+
+			googleAnalytics.reports.batchGet(
+				{
+					// headers: {
+					// 	"Content-Type": "application/json",
+					// },
+					auth: oauth2Client,
+					// @ts-ignore
+					resource: {
+						reportRequests: repReq,
+					},
+				},
+				async (err: any, data: any) => {
+					if (err) {
+						console.error("Error: " + err);
+						res.send("An error occurred");
+						return;
+					} else if (data) {
+						console.log(data);
+						const googleResultsArr = data.data.reports[0].data.rows.map(
+							(row: any) => {
+								const data = row.dimensions[0].replace(
+									/(\d{4})(\d{2})(\d{2})/g,
+									"$1-$2-$3"
+								);
+
+								return {
+									ds: data,
+									//[metricName]: row.metrics[0].values[0],
+									y: row.metrics[0].values[0],
+								};
+							}
+						);
+						console.log(googleResultsArr);
+						const forecastResults = await forecast(
+							googleResultsArr,
+							period
+						);
+						res.send({
+							forecast: forecastResults,
+							actual: googleResultsArr,
+						});
+					}
+				}
+			);
+		}
+	);
+
 	app.get("/auth/google", (_, res) => {
 		res.redirect(url);
 	});
@@ -106,7 +194,7 @@ const main = async () => {
 				oauth2Client.setCredentials({
 					access_token: tokens?.access_token,
 				});
-				if (process.env.NODE_ENV === "production") {
+				if (__prod__) {
 					res.redirect("/");
 					return;
 				}
@@ -118,8 +206,6 @@ const main = async () => {
 	});
 
 	app.get("/analytics/accounts", (req, res) => {
-		console.log(req.session);
-
 		if (!req.session?.token) {
 			res.send({
 				errors: [
@@ -248,89 +334,6 @@ const main = async () => {
 	});
 
 	app.post(
-		"/analytics/data",
-		validateAnalyticsSubmission,
-		async (req, res) => {
-			if (!req.session?.token) {
-				throw new Error("Not Authenticated");
-			}
-
-			oauth2Client.setCredentials({
-				access_token: req.session?.token,
-			});
-
-			const { viewId, startDate, endDate, metricId, period } = req.body;
-
-			let repReq = [
-				{
-					includeEmptyRows: "true",
-					viewId,
-					dateRanges: [
-						{
-							startDate,
-							endDate,
-						},
-					],
-					metrics: [
-						{
-							expression: metricId,
-						},
-					],
-					dimensions: [
-						{
-							name: "ga:date",
-						},
-					],
-				},
-			];
-
-			googleAnalytics.reports.batchGet(
-				{
-					// headers: {
-					// 	"Content-Type": "application/json",
-					// },
-					auth: oauth2Client,
-					// @ts-ignore
-					resource: {
-						reportRequests: repReq,
-					},
-				},
-				async (err: any, data: any) => {
-					if (err) {
-						console.error("Error: " + err);
-						res.send("An error occurred");
-						return;
-					} else if (data) {
-						console.log(data);
-						const googleResultsArr = data.data.reports[0].data.rows.map(
-							(row: any) => {
-								const data = row.dimensions[0].replace(
-									/(\d{4})(\d{2})(\d{2})/g,
-									"$1-$2-$3"
-								);
-
-								return {
-									ds: data,
-									//[metricName]: row.metrics[0].values[0],
-									y: row.metrics[0].values[0],
-								};
-							}
-						);
-						const forecastResults = await forecast(
-							googleResultsArr,
-							period
-						);
-						res.send({
-							forecast: forecastResults,
-							actual: googleResultsArr,
-						});
-					}
-				}
-			);
-		}
-	);
-
-	app.post(
 		"/csv/data",
 		[upload.single("file"), validateCsvSubmission],
 		async (req: any, res: any) => {
@@ -395,9 +398,12 @@ const main = async () => {
 	);
 
 	const forecast = async (data: unknown[], period: string) => {
+		console.log(data);
 		try {
 			const pythonResponse: AxiosResponse = await axios.post(
-				"http://0.0.0.0:5000/api/forecast",
+				__prod__
+					? "http://flask:5000"
+					: "http://localhost:5000/api/forecast/",
 				{
 					data,
 					period,
@@ -409,8 +415,14 @@ const main = async () => {
 			// 		element.ds + new Date().getTimezoneOffset() * 60000
 			// 	);
 			// });
-			return pythonResponse.data;
+			console.log(pythonResponse);
+			if (!pythonResponse.data) {
+				throw new Error("Data not found");
+			} else {
+				return pythonResponse.data;
+			}
 		} catch (e) {
+			console.log(e);
 			throw new Error(e.response);
 		}
 	};
