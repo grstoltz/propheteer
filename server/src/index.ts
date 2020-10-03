@@ -402,7 +402,7 @@ const main = async () => {
 		try {
 			const pythonResponse: AxiosResponse = await axios.post(
 				__prod__
-					? "http://flask:5000"
+					? "http://flask:5000/api/forecast/"
 					: "http://localhost:5000/api/forecast/",
 				{
 					data,

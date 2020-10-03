@@ -2,12 +2,14 @@ version: "2.1"
 services:
    web:
       build: .
-      ports:
-         - "80:4000"
       restart: always
+      expose: 
+         - "80"
       environment:
          NODE_ENV: production
-         PORT: 4000
+         - VIRTUAL_HOST=propheteer.grantstoltz.com
+         - LETSENCRYPT_HOST=propheteer.grantstoltz.com
+         - VIRTUAL_PORT=4000
       links:
          - redis:redis
    flask:
@@ -21,3 +23,10 @@ services:
    redis:
       image: "redis:alpine"
       restart: always
+
+networks:
+   default:
+         external:
+            name: nginx-proxy
+
+
