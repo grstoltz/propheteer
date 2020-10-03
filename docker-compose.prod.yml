@@ -3,10 +3,10 @@ services:
    web:
       build: .
       restart: always
-      expose: 
+      expose:
          - "80"
       environment:
-         NODE_ENV: production
+         - NODE_ENV=production
          - VIRTUAL_HOST=propheteer.grantstoltz.com
          - LETSENCRYPT_HOST=propheteer.grantstoltz.com
          - VIRTUAL_PORT=4000
@@ -26,7 +26,5 @@ services:
 
 networks:
    default:
-         external:
-            name: nginx-proxy
-
-
+      external:
+         name: nginx-proxy
