@@ -1,7 +1,7 @@
 FROM node:14.11 as client
 WORKDIR /usr/app/client/
 COPY client/package*.json .
-RUN npm install -
+RUN npm install
 COPY client/ .
 RUN npm run build
 # Setup the server

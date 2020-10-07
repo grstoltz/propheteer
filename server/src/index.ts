@@ -398,12 +398,12 @@ const main = async () => {
 	);
 
 	const forecast = async (data: unknown[], period: string) => {
-		console.log(data);
 		try {
 			const pythonResponse: AxiosResponse = await axios.post(
-				__prod__
-					? "http://flask:5000/api/forecast/"
-					: "http://localhost:5000/api/forecast/",
+				// __prod__
+				// 	? "http://flask:5000/api/forecast/"
+				// 	: "http://localhost:5000/api/forecast/",
+				"https://propheteerapi-ly6ayimbqa-uc.a.run.app/api/forecast/",
 				{
 					data,
 					period,

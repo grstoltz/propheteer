@@ -1,10 +1,11 @@
-FROM python:3.8.6-buster
+FROM python:3.7-buster
 WORKDIR /flask
 ADD . .
 # RUN apk add --no-cache --virtual .build-deps gcc musl-dev \
 #     && pip install cython numpy\
 
 RUN apt-get -y update  && apt-get install -y \
+  gcc \
   python3-dev \
   libpng-dev \
   apt-utils \
@@ -24,4 +25,9 @@ RUN pip install psycopg2
 RUN pip install sqlalchemy
 RUN pip install flask
 
-CMD ["flask", "run", "-h", "0.0.0.0", "-p", "5000"]
+EXPOSE 8080
+
+ENV FLASK_APP=main.py
+ENV FLASK_DEBUG=1
+
+CMD ["flask", "run", "-h", "0.0.0.0", "-p", "8080"]
