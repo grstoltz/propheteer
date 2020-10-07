@@ -39,7 +39,7 @@ const googleAnalytics = google.analyticsreporting("v4");
 const clientID = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
 const callbackURL = __prod__
-	? "http://localhost/login/google/return"
+	? "https://propheteer.grantstoltz.com/login/google/return"
 	: "http://localhost:4000/login/google/return";
 const oauth2Client = new google.auth.OAuth2(
 	clientID,
