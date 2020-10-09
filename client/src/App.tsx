@@ -229,7 +229,6 @@ const App = () => {
 										metricName: metric,
 										period,
 									};
-									console.log("postobj", postObj);
 									const response = await axios.post(
 										`/analytics/data`,
 										postObj,
@@ -395,7 +394,14 @@ const App = () => {
 													</CSVLink>
 												) : null}
 												{authorized ? null : (
-													<Link href={`/auth/google`}>
+													<Link
+														href={
+															process.env.NODE_ENV ===
+															"production"
+																? `/auth/google`
+																: "http://localhost:4000/auth/google"
+														}
+													>
 														<Button ml={4} as={Link}>
 															Login to Google Analytics
 														</Button>

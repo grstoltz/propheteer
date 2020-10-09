@@ -23,6 +23,9 @@ import {
 	validateCsvSubmission,
 } from "../utils/validateSubmission";
 
+import { isValidDate } from "../utils/isValidDate";
+import { isAuth } from "../utils/isAuth";
+
 const upload = multer({
 	fileFilter: (_, file, cb) => {
 		if (file.mimetype == "text/csv") {
@@ -96,14 +99,8 @@ const main = async () => {
 
 	app.post(
 		"/analytics/data",
-		validateAnalyticsSubmission,
+		[isAuth, validateAnalyticsSubmission],
 		async (req: any, res: any) => {
-			console.log("hit");
-			//console.log(req.body);
-			// if (!req.session?.token) {
-			// 	throw new Error("Not Authenticated");
-			// }
-
 			oauth2Client.setCredentials({
 				access_token: req.session?.token,
 			});
@@ -135,9 +132,6 @@ const main = async () => {
 
 			googleAnalytics.reports.batchGet(
 				{
-					// headers: {
-					// 	"Content-Type": "application/json",
-					// },
 					auth: oauth2Client,
 					// @ts-ignore
 					resource: {
@@ -165,7 +159,6 @@ const main = async () => {
 								};
 							}
 						);
-						console.log(googleResultsArr);
 						const forecastResults = await forecast(
 							googleResultsArr,
 							period
@@ -205,18 +198,7 @@ const main = async () => {
 		});
 	});
 
-	app.get("/analytics/accounts", (req, res) => {
-		if (!req.session?.token) {
-			res.send({
-				errors: [
-					{
-						field: "account",
-						error: "Not Authenticated",
-					},
-				],
-			});
-			return;
-		}
+	app.get("/analytics/accounts", isAuth, (req, res) => {
 		oauth2Client.setCredentials({
 			access_token: req.session?.token,
 		});
@@ -244,12 +226,8 @@ const main = async () => {
 
 	app.post(
 		"/analytics/properties",
-		validatePropertiesSubmission,
-		(req, res) => {
-			if (!req.session?.token) {
-				throw new Error("Not Authenticated");
-			}
-
+		[isAuth, validatePropertiesSubmission],
+		(req: any, res: any) => {
 			const accountId = String(req.body.accountId);
 			oauth2Client.setCredentials({
 				access_token: req.session?.token,
@@ -278,38 +256,40 @@ const main = async () => {
 		}
 	);
 
-	app.post("/analytics/views", validateViewsSubmission, (req, res) => {
-		if (!req.session?.token) {
-			throw new Error("Not Authenticated");
-		}
-		const accountId = String(req.body.accountId);
-		const webPropertyId = String(req.body.propertyId);
-		oauth2Client.setCredentials({
-			access_token: req.session?.token,
-		});
-		googleAccounts.management.profiles.list(
-			{
-				auth: oauth2Client,
-				accountId,
-				webPropertyId,
-			},
-			(err, data: any) => {
-				if (err) {
-					console.error("Error: " + err);
-					res.send("An error occurred");
-				} else if (data) {
-					let views: any = [];
-					data.data.items.forEach((view: any) => {
-						views.push({
-							name: view.name,
-							id: view.id,
+	app.post(
+		"/analytics/views",
+		[isAuth, validateViewsSubmission],
+		(req: any, res: any) => {
+			const accountId = String(req.body.accountId);
+			const webPropertyId = String(req.body.propertyId);
+			oauth2Client.setCredentials({
+				access_token: req.session?.token,
+			});
+			googleAccounts.management.profiles.list(
+				{
+					auth: oauth2Client,
+					accountId,
+					webPropertyId,
+				},
+				(err, data: any) => {
+					if (err) {
+						console.error("Error: " + err);
+						res.send("An error occurred");
+						return;
+					} else if (data) {
+						let views: any = [];
+						data.data.items.forEach((view: any) => {
+							views.push({
+								name: view.name,
+								id: view.id,
+							});
 						});
-					});
-					res.send({ type: "views", results: views });
+						res.send({ type: "views", results: views });
+					}
 				}
-			}
-		);
-	});
+			);
+		}
+	);
 
 	app.get("/analytics/metrics", async (_, res) => {
 		const result = await axios.get(
@@ -321,9 +301,7 @@ const main = async () => {
 				e.attributes.type === "METRIC" &&
 				e.attributes.status !== "DEPRECATED"
 			) {
-				const id = e.id;
-				const kind = e.kind;
-				const obj = { id, kind, ...e.attributes };
+				const obj = { id: e.id, kind: e.kind, ...e.attributes };
 				return obj;
 			}
 		});
@@ -355,19 +333,39 @@ const main = async () => {
 			const file = req.file.buffer.toString("utf8");
 			const { period } = req.body;
 
-			const { data: csvArr } = papa.parse(file, {
+			const { data: csvArr }: any = papa.parse(file, {
 				header: true,
 				skipEmptyLines: true,
 			});
+
+			if (!csvArr[0].date || !csvArr[0].Date) {
+				res.send({
+					errors: [
+						{
+							field: "file",
+							message: 'File must have a column titled "date"',
+						},
+					],
+				});
+				return;
+			} else if (!isValidDate(csvArr[0].date)) {
+				res.send({
+					errors: [
+						{
+							field: "file",
+							message: "Date must be in YYYY-MM-DD format",
+						},
+					],
+				});
+				return;
+			}
 
 			csvArr.forEach((value: unknown) => {
 				//@ts-ignore
 				delete value[""];
 				//@ts-ignore
-
 				value.y = value.trend;
 				//@ts-ignore
-
 				delete value.trend;
 			});
 
@@ -384,7 +382,6 @@ const main = async () => {
 					message =
 						"Please ensure your date is in YYYY-MM-DD format and in the leftmost column";
 				}
-
 				res.send({
 					errors: [
 						{
@@ -400,30 +397,21 @@ const main = async () => {
 	const forecast = async (data: unknown[], period: string) => {
 		try {
 			const pythonResponse: AxiosResponse = await axios.post(
-				// __prod__
-				// 	? "http://flask:5000/api/forecast/"
-				// 	: "http://localhost:5000/api/forecast/",
-				"https://propheteerapi-ly6ayimbqa-uc.a.run.app/api/forecast/",
+				__prod__
+					? "https://propheteerapi-ly6ayimbqa-uc.a.run.app/api/forecast/"
+					: "http://localhost:5000/api/forecast/",
 				{
 					data,
 					period,
 				}
 			);
-
-			// pythonResponse.data.forEach((element: any) => {
-			// 	element.ds = new Date(
-			// 		element.ds + new Date().getTimezoneOffset() * 60000
-			// 	);
-			// });
-			console.log(pythonResponse);
 			if (!pythonResponse.data) {
 				throw new Error("Data not found");
 			} else {
 				return pythonResponse.data;
 			}
 		} catch (e) {
-			console.log(e);
-			throw new Error(e.response);
+			return e;
 		}
 	};
 
