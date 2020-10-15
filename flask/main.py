@@ -46,6 +46,7 @@ def api_forecast():
         response = forecast.to_json(orient="records")
         return response
     except KeyError as error:
+        print(error)
         return "KeyError", 400
 
 if __name__ == '__main__':

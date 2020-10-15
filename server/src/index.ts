@@ -338,7 +338,7 @@ const main = async () => {
 				skipEmptyLines: true,
 			});
 
-			if (!csvArr[0].date || !csvArr[0].Date) {
+			if (!csvArr[0].date && !csvArr[0].Date) {
 				res.send({
 					errors: [
 						{
@@ -353,20 +353,24 @@ const main = async () => {
 					errors: [
 						{
 							field: "file",
-							message: "Date must be in YYYY-MM-DD format",
+							message: "Date column must be in YYYY-MM-DD format",
 						},
 					],
 				});
 				return;
 			}
 
-			csvArr.forEach((value: unknown) => {
+			csvArr.forEach((row: unknown) => {
 				//@ts-ignore
-				delete value[""];
+				delete row[""];
 				//@ts-ignore
-				value.y = value.trend;
+				// row.y = row.meric;
 				//@ts-ignore
-				delete value.trend;
+				row.ds = row.date;
+				//@ts-ignore
+				delete row.trend;
+				//@ts-ignore
+				delete row.date;
 			});
 
 			try {
@@ -399,7 +403,7 @@ const main = async () => {
 			const pythonResponse: AxiosResponse = await axios.post(
 				__prod__
 					? "https://propheteerapi-ly6ayimbqa-uc.a.run.app/api/forecast/"
-					: "http://localhost:5000/api/forecast/",
+					: "http://localhost:8080/api/forecast/",
 				{
 					data,
 					period,
