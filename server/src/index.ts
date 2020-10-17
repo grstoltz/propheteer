@@ -169,7 +169,7 @@ const main = async () => {
 							period
 						);
 
-						if (forecastResults.code !== "200") {
+						if (forecastResults.code) {
 							res.send({
 								errors: [
 									{
@@ -459,14 +459,13 @@ const main = async () => {
 		try {
 			const pythonResponse: AxiosResponse = await axios.post(
 				__prod__
-					? "https://propheteerapi-ly6ayimbqa-uc.a.run.app/api/forecast/"
+					? (process.env.PROPHETEER_API_URL as string)
 					: "http://localhost:8080/api/forecast/",
 				{
 					data,
 					period,
 				}
 			);
-
 			if (!pythonResponse.data) {
 				throw new Error("Data not found");
 			} else {
