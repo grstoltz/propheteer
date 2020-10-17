@@ -1,19 +1,14 @@
 import * as React from "react";
 import { Scatter } from "react-chartjs-2";
 
-interface actualData {
+interface data {
 	ds: string;
 	y: string;
 }
 
-// interface forecastData {
-// 	ds: string;
-// 	trend: string;
-// }
-
 interface ChartProps {
-	forecastData?: object[];
-	actualData?: actualData[];
+	forecastData?: data[];
+	actualData?: data[];
 }
 
 /* Component */
@@ -24,43 +19,43 @@ const Chart = (props: ChartProps) => {
 		(row: any) => {
 			return {
 				x: row.ds,
-				y: row.trend,
+				y: row.yhat,
 			};
 		}
 	);
 
-	const actualDataArr: object[] | undefined = actualData?.map(
-		(row: actualData) => {
-			return {
-				x: row.ds,
-				y: row.y,
-			};
-		}
-	);
+	const actualDataArr: object[] | undefined = actualData?.map((row: data) => {
+		return {
+			x: row.ds,
+			y: row.y,
+		};
+	});
+
+	const defaultLabels = [
+		"2020-01-01",
+		"2020-02-01",
+		"2020-03-01",
+		"2020-04-01",
+		"2020-05,01",
+		"2020-06-01",
+		"2020-07-01",
+		"2020-08-01",
+		"2020-09-01",
+		"2020-10-01",
+		"2020-11-01",
+		"2020-12-01",
+	];
 
 	const data = {
-		labels: [
-			"2020-01-01",
-			"2020-02-01",
-			"2020-03-01",
-			"2020-04-01",
-			"2020-05,01",
-			"2020-06-01",
-			"2020-07-01",
-			"2020-08-01",
-			"2020-09-01",
-			"2020-10-01",
-			"2020-11-01",
-			"2020-12-01",
-		],
+		labels: forecastData?.length ? [] : defaultLabels,
 		datasets: [
 			{
 				label: "Actual",
 				data: actualDataArr,
 				fill: false,
-				pointRadius: 2,
-				backgroundColor: "rgba(0, 0, 0, 0.5)",
-				borderColor: "black",
+				pointRadius: 1,
+				backgroundColor: "#171923",
+				borderColor: "#171923",
 				borderWidth: 1,
 			},
 			{
@@ -68,9 +63,9 @@ const Chart = (props: ChartProps) => {
 				data: forecastDataArr,
 				fill: false,
 				pointRadius: 0,
-				backgroundColor: "rgba(54, 162, 235, 0.2)",
-				borderColor: "rgba(54, 162, 235, 1)",
-				borderWidth: 2,
+				backgroundColor: "#4FD1C5",
+				borderColor: "#4FD1C5",
+				borderWidth: 1,
 				showLine: true,
 			},
 		],
@@ -84,6 +79,22 @@ const Chart = (props: ChartProps) => {
 					time: { parser: "YYYY-MM-DD" },
 				},
 			],
+		},
+		tooltips: {
+			callbacks: {
+				label: (tooltipItem: any, data: any) => {
+					let label = data.datasets[tooltipItem.datasetIndex].label || "";
+
+					if (label) {
+						label += ":";
+					}
+					label = `${label} ${
+						Math.round(tooltipItem.yLabel * 100) / 100
+					} | ${tooltipItem.xLabel}`;
+
+					return label;
+				},
+			},
 		},
 	};
 	return <Scatter data={data} options={options} />;

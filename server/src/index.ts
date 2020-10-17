@@ -9,10 +9,10 @@ import session from "express-session";
 import Redis from "ioredis";
 import connectRedis from "connect-redis";
 import * as bodyParser from "body-parser";
+import logger from "morgan";
 import multer from "multer";
 import cors from "cors";
 import { google } from "googleapis";
-import * as _ from "lodash";
 import papa from "papaparse";
 import path from "path";
 
@@ -21,8 +21,8 @@ import {
 	validatePropertiesSubmission,
 	validateViewsSubmission,
 	validateCsvSubmission,
+	validateMetricsSubmission,
 } from "../utils/validateSubmission";
-
 import { isValidDate } from "../utils/isValidDate";
 import { isAuth } from "../utils/isAuth";
 
@@ -55,13 +55,19 @@ const url = oauth2Client.generateAuthUrl({
 	scope: "https://www.googleapis.com/auth/analytics.readonly",
 });
 
+const RedisStore = connectRedis(session);
+const redis = new Redis(process.env.REDIS_URL);
+
 const main = async () => {
 	const app = express();
 
-	app.use(express.static(path.join(__dirname, "../../../client/", "build")));
+	if (__prod__) {
+		app.use(logger("tiny"));
+	} else {
+		app.use(logger("dev"));
+	}
 
-	const RedisStore = connectRedis(session);
-	const redis = new Redis(process.env.REDIS_URL);
+	app.use(express.static(path.join(__dirname, "../../../client/", "build")));
 
 	app.use(
 		bodyParser.urlencoded({
@@ -88,8 +94,8 @@ const main = async () => {
 				maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 years
 				httpOnly: true,
 				sameSite: "lax", // csrf
-				//secure: __prod__, // cookie only works in https
-				//domain: __prod__ ? ".codeponder.com" : undefined,
+				secure: __prod__, // cookie only works in https
+				domain: __prod__ ? ".grantstoltz.com" : undefined,
 			},
 			saveUninitialized: false,
 			secret: process.env.SESSION_SECRET as string,
@@ -144,7 +150,6 @@ const main = async () => {
 						res.send("An error occurred");
 						return;
 					} else if (data) {
-						console.log(data);
 						const googleResultsArr = data.data.reports[0].data.rows.map(
 							(row: any) => {
 								const data = row.dimensions[0].replace(
@@ -163,10 +168,24 @@ const main = async () => {
 							googleResultsArr,
 							period
 						);
-						res.send({
-							forecast: forecastResults,
-							actual: googleResultsArr,
-						});
+
+						if (forecastResults.code !== "200") {
+							res.send({
+								errors: [
+									{
+										field: "period",
+										message:
+											"There was an error processing your request",
+									},
+								],
+							});
+							return;
+						} else {
+							res.send({
+								forecast: forecastResults,
+								actual: googleResultsArr,
+							});
+						}
 					}
 				}
 			);
@@ -228,7 +247,7 @@ const main = async () => {
 		"/analytics/properties",
 		[isAuth, validatePropertiesSubmission],
 		(req: any, res: any) => {
-			const accountId = String(req.body.accountId);
+			const { accountId } = req.body;
 			oauth2Client.setCredentials({
 				access_token: req.session?.token,
 			});
@@ -237,7 +256,7 @@ const main = async () => {
 					auth: oauth2Client,
 					accountId: accountId,
 				},
-				(err, data: any) => {
+				(err: any, data: any) => {
 					if (err) {
 						console.error("Error: " + err);
 						res.send("An error occurred");
@@ -260,8 +279,8 @@ const main = async () => {
 		"/analytics/views",
 		[isAuth, validateViewsSubmission],
 		(req: any, res: any) => {
-			const accountId = String(req.body.accountId);
-			const webPropertyId = String(req.body.propertyId);
+			const { accountId, propertyId: webPropertyId } = req.body;
+
 			oauth2Client.setCredentials({
 				access_token: req.session?.token,
 			});
@@ -271,7 +290,7 @@ const main = async () => {
 					accountId,
 					webPropertyId,
 				},
-				(err, data: any) => {
+				(err: any, data: any) => {
 					if (err) {
 						console.error("Error: " + err);
 						res.send("An error occurred");
@@ -291,25 +310,49 @@ const main = async () => {
 		}
 	);
 
-	app.get("/analytics/metrics", async (_, res) => {
-		const result = await axios.get(
-			"https://www.googleapis.com/analytics/v3/metadata/ga/columns"
-		);
+	app.post(
+		"/analytics/metrics",
+		[isAuth, validateMetricsSubmission],
+		async (req: any, res: any) => {
+			const {
+				accountId,
+				propertyId: webPropertyId,
+				viewId: profileId,
+			} = req.body;
 
-		const metricArr = result.data.items.map((e: any) => {
-			if (
-				e.attributes.type === "METRIC" &&
-				e.attributes.status !== "DEPRECATED"
-			) {
-				const obj = { id: e.id, kind: e.kind, ...e.attributes };
-				return obj;
-			}
-		});
+			const baseMetrics = await axios.get(
+				"https://www.googleapis.com/analytics/v3/metadata/ga/columns"
+			);
 
-		const filteredArr = metricArr.filter(Boolean);
+			oauth2Client.setCredentials({
+				access_token: req.session?.token,
+			});
 
-		res.send(filteredArr);
-	});
+			const userMetrics = await googleAccounts.management.goals.list({
+				auth: oauth2Client,
+				accountId,
+				webPropertyId,
+				profileId,
+			});
+
+			const metricArr = baseMetrics.data.items.map((e: any) => {
+				if (
+					e.attributes.type === "METRIC" &&
+					e.attributes.status !== "DEPRECATED" &&
+					e.attributes.uiName.toLowerCase().indexOf("goal") === -1
+				) {
+					const obj = { id: e.id, kind: e.kind, ...e.attributes };
+					return obj;
+				}
+			});
+
+			const combinedArr = metricArr
+				.filter(Boolean)
+				.concat(userMetrics.data.items);
+
+			res.send(combinedArr);
+		}
+	);
 
 	app.post(
 		"/csv/data",
@@ -333,12 +376,12 @@ const main = async () => {
 			const file = req.file.buffer.toString("utf8");
 			const { period } = req.body;
 
-			const { data: csvArr }: any = papa.parse(file, {
+			const { data: csvData }: any = papa.parse(file, {
 				header: true,
 				skipEmptyLines: true,
 			});
 
-			if (!csvArr[0].date && !csvArr[0].Date) {
+			if (!csvData[0].date && !csvData[0].Date) {
 				res.send({
 					errors: [
 						{
@@ -348,7 +391,7 @@ const main = async () => {
 					],
 				});
 				return;
-			} else if (!isValidDate(csvArr[0].date)) {
+			} else if (!isValidDate(csvData[0].date)) {
 				res.send({
 					errors: [
 						{
@@ -358,23 +401,37 @@ const main = async () => {
 					],
 				});
 				return;
+			} else if (Object.keys(csvData[0]).length > 2) {
+				res.send({
+					errors: [
+						{
+							field: "file",
+							message:
+								"Your file must only have two columns of date and a metric",
+						},
+					],
+				});
+				return;
 			}
 
-			csvArr.forEach((row: unknown) => {
-				//@ts-ignore
-				delete row[""];
-				//@ts-ignore
-				// row.y = row.meric;
-				//@ts-ignore
-				row.ds = row.date;
-				//@ts-ignore
-				delete row.trend;
-				//@ts-ignore
-				delete row.date;
+			let dimensionPosition = 0;
+			let valuePosition = 1;
+
+			if (!isValidDate(Object.values(csvData[0])[0] as string)) {
+				dimensionPosition = 1;
+				valuePosition = 0;
+			}
+
+			const csvArr = csvData.map((row: any) => {
+				return {
+					ds: Object.values(row)[dimensionPosition],
+					y: Object.values(row)[valuePosition],
+				};
 			});
 
 			try {
 				const forecastResults = await forecast(csvArr, period);
+
 				res.send({
 					forecast: forecastResults,
 					actual: csvArr,
@@ -409,6 +466,7 @@ const main = async () => {
 					period,
 				}
 			);
+
 			if (!pythonResponse.data) {
 				throw new Error("Data not found");
 			} else {

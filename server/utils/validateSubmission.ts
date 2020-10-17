@@ -65,7 +65,7 @@ const analyticsSubmissionSchema = Joi.object().keys({
 		}),
 	period: Joi.number()
 		.min(1)
-		.max(700)
+		.max(3650)
 		.required()
 		.error((errors: any) => {
 			errors.forEach((err: any) => {
@@ -80,7 +80,7 @@ const analyticsSubmissionSchema = Joi.object().keys({
 						err.message = "Period must be a number";
 						break;
 					case "number.max":
-						err.message = "Period must be less than 700 days";
+						err.message = "Period must be less than 3650 days";
 						break;
 					case "number.min":
 						err.message = "Period must be at least 1 day";
@@ -159,10 +159,16 @@ const viewsSchema = Joi.object().keys({
 	propertyId: Joi.string().required().label("property"),
 });
 
+const metricsSchema = Joi.object().keys({
+	accountId: Joi.string().required().label("account"),
+	propertyId: Joi.string().required().label("property"),
+	viewId: Joi.string().required().label("view"),
+});
+
 const csvSchema = Joi.object().keys({
 	period: Joi.number()
 		.min(1)
-		.max(700)
+		.max(3650)
 		.required()
 		.error((errors: any) => {
 			errors.forEach((err: any) => {
@@ -177,7 +183,7 @@ const csvSchema = Joi.object().keys({
 						err.message = "Period must be a number";
 						break;
 					case "number.max":
-						err.message = "Period must be less than 700 days";
+						err.message = "Period must be less than 3650 days";
 						break;
 					case "number.min":
 						err.message = "Period must be at least 1 day";
@@ -241,6 +247,14 @@ export const validateViewsSubmission = (
 	next: NextFunction
 ) => {
 	validateRequest(req, res, next, viewsSchema);
+};
+
+export const validateMetricsSubmission = (
+	req: Request,
+	res: Response,
+	next: NextFunction
+) => {
+	validateRequest(req, res, next, metricsSchema);
 };
 
 export const validateCsvSubmission = (

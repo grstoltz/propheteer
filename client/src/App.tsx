@@ -8,6 +8,7 @@ import {
 	TabPanels,
 	Tab,
 	TabPanel,
+	Flex,
 } from "@chakra-ui/core";
 import { CSVLink } from "react-csv";
 import { Formik, Form, FormikErrors } from "formik";
@@ -43,8 +44,6 @@ const App = () => {
 			} else {
 				setAuthorized(true);
 				setAccounts(accountResult.data.results);
-				const metricResult = await getMetrics();
-				setMetrics(metricResult.data);
 			}
 		} catch (error) {
 			console.log(error);
@@ -85,10 +84,22 @@ const App = () => {
 		);
 	};
 
-	const getMetrics = () => {
-		return axios.get(`/analytics/metrics`, {
-			withCredentials: true,
-		});
+	const getMetrics = (
+		accountId: string,
+		propertyId: string,
+		viewId: string
+	) => {
+		return axios.post(
+			`/analytics/metrics`,
+			{
+				accountId,
+				propertyId,
+				viewId,
+			},
+			{
+				withCredentials: true,
+			}
+		);
 	};
 
 	const handleAccountChange = async (
@@ -130,12 +141,20 @@ const App = () => {
 		}
 	};
 
-	const handleViewChange = async (e: any, setFieldValue: any) => {
+	const handleViewChange = async (e: any, setFieldValue: any, values: any) => {
 		const { selectedOptions, value } = e.target;
 		const optionId = selectedOptions[0].id;
 		if (optionId) {
 			setFieldValue("view", value);
 			setFieldValue("viewId", optionId);
+			const _metrics = await getMetrics(
+				values.accountId,
+				values.propertyId,
+				optionId
+			);
+			console.log(_metrics);
+			setMetrics(_metrics.data);
+			setFieldValue("metric", "");
 		}
 	};
 
@@ -194,7 +213,7 @@ const App = () => {
 				<Tabs variant="enclosed">
 					<TabList>
 						<Tab>Forecast Using Google Analytics Data</Tab>
-						<Tab>Forcast Using a CSV File</Tab>
+						<Tab>Forecast Using a CSV File</Tab>
 					</TabList>
 					<TabPanels>
 						<TabPanel>
@@ -309,7 +328,8 @@ const App = () => {
 													onChange={(event: any) => {
 														handleViewChange(
 															event,
-															setFieldValue
+															setFieldValue,
+															values
 														);
 													}}
 												/>
@@ -332,20 +352,24 @@ const App = () => {
 													}}
 												/>
 											</Box>
-											<Box mt={4}>
-												<DatePickerField
-													name="startDate"
-													label="Start Date"
-													value={values.startDate}
-													onChange={() => setFieldValue}
-												/>
-												<DatePickerField
-													name="endDate"
-													label="End Date"
-													value={values.endDate}
-													onChange={() => setFieldValue}
-												/>
-											</Box>
+											<Flex mt={4}>
+												<Box>
+													<DatePickerField
+														name="startDate"
+														label="Start Date"
+														value={values.startDate}
+														onChange={() => setFieldValue}
+													/>
+												</Box>
+												<Box ml={5}>
+													<DatePickerField
+														name="endDate"
+														label="End Date"
+														value={values.endDate}
+														onChange={() => setFieldValue}
+													/>
+												</Box>
+											</Flex>
 											<Box mt={4}>
 												<InputField
 													name="period"
@@ -360,7 +384,12 @@ const App = () => {
 												<Button
 													type="button"
 													className="outline"
-													onClick={handleReset}
+													onClick={() => {
+														setForecastData([]);
+														setActualData([]);
+
+														handleReset();
+													}}
 													isDisabled={!dirty || isSubmitting}
 												>
 													Reset

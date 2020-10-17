@@ -32,9 +32,11 @@ export const NavBar = (props: NavBarProps) => {
 			{...props}
 		>
 			<Flex align="center" mr={5}>
-				<Heading as="h1" size="lg" letterSpacing={"-.1rem"}>
-					Propheteer
-				</Heading>
+				<MenuItems to="/">
+					<Heading as="h1" size="lg" letterSpacing={"-.1rem"}>
+						Propheteer
+					</Heading>
+				</MenuItems>
 			</Flex>
 
 			<Box
@@ -44,18 +46,6 @@ export const NavBar = (props: NavBarProps) => {
 				flexGrow={1}
 				color="teal.300"
 			>
-				{/* <MenuList>
-					<MenuItem>
-						<Link as={RouterLink} to="/">
-							Home
-						</Link>
-					</MenuItem>
-					<MenuItem>
-						<Link as={RouterLink} to="/about">
-							About
-						</Link>
-					</MenuItem>
-				</MenuList> */}
 				<MenuItems to="/">Home</MenuItems>
 				<MenuItems to="/about">About </MenuItems>
 			</Box>

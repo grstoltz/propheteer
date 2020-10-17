@@ -34,8 +34,6 @@ def api_forecast():
 
         df['ds'] = pd.to_datetime(df['ds'], format='%Y-%m-%d').dt.strftime("%Y-%m-%d")
 
-    # df = df.from_records(df)
-        print(df)
         m = Prophet()
         m.fit(df)
         future = m.make_future_dataframe(periods=period)
