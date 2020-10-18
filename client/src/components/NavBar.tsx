@@ -1,22 +1,8 @@
 import * as React from "react";
-import { Link } from "react-router-dom";
-import { Flex, Heading, Box, Text } from "@chakra-ui/core";
+import { Flex, Heading, Box } from "@chakra-ui/core";
+import { MenuItems } from "../components/MenuItems";
 
 interface NavBarProps {}
-
-const MenuItems = (props: any) => {
-	const { children, isLast, to = "/", ...rest } = props;
-	return (
-		<Text
-			mb={{ base: isLast ? 0 : 8, sm: 0 }}
-			mr={{ base: 0, sm: isLast ? 0 : 8 }}
-			display="block"
-			{...rest}
-		>
-			<Link to={to}>{children}</Link>
-		</Text>
-	);
-};
 
 export const NavBar = (props: NavBarProps) => {
 	return (
@@ -32,11 +18,9 @@ export const NavBar = (props: NavBarProps) => {
 			{...props}
 		>
 			<Flex align="center" mr={5}>
-				<MenuItems to="/">
-					<Heading as="h1" size="lg" letterSpacing={"-.1rem"}>
-						Propheteer
-					</Heading>
-				</MenuItems>
+				<Heading as="h1" size="lg" letterSpacing={"-.1rem"}>
+					<MenuItems to="/">Propheteer</MenuItems>
+				</Heading>
 			</Flex>
 
 			<Box

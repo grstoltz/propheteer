@@ -169,8 +169,6 @@ const main = async () => {
 							period
 						);
 
-						console.log(forecastResults);
-
 						if (forecastResults.code) {
 							res.send({
 								errors: [

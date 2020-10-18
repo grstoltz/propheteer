@@ -9,7 +9,10 @@ const About = () => {
 			<Text fontSize="4xl">About</Text>
 			<Text fontSize="md">
 				Propheteer is an application based on the{" "}
-				<Link href="http://https://facebook.github.io/prophet/">
+				<Link
+					color="teal.500"
+					href="http://https://facebook.github.io/prophet/"
+				>
 					{" "}
 					Facebook Prophet
 				</Link>{" "}
