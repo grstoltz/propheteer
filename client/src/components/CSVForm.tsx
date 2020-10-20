@@ -2,7 +2,7 @@ import * as React from "react";
 import { CSVUploadField } from "./CSVUploadField";
 import { CSVLink } from "react-csv";
 
-import { Box, Button, Link, Text } from "@chakra-ui/core";
+import { Box, Button, Link, Spinner, Text } from "@chakra-ui/core";
 import { Formik, Form } from "formik";
 
 import { InputField } from "./InputField";
@@ -87,7 +87,7 @@ export const CSVForm: React.FC<CSVFormProps> = ({ ...props }) => {
 										isSubmitting || !values.file || !values.period
 									}
 								>
-									Submit
+									{isSubmitting ? <Spinner /> : "Submit"}
 								</Button>
 								{forecastData.length ? (
 									<CSVLink

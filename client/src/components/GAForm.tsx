@@ -123,7 +123,6 @@ export const GAForm: React.FC<GAFormProps> = ({ ...props }) => {
 		setFieldValue: any,
 		values: any
 	) => {
-		console.log("values", values);
 		const { selectedOptions, value } = e.target;
 		const optionId = selectedOptions[0].id;
 		if (optionId) {
@@ -146,7 +145,6 @@ export const GAForm: React.FC<GAFormProps> = ({ ...props }) => {
 				values.propertyId,
 				optionId
 			);
-			console.log(_metrics);
 			setMetrics(_metrics.data);
 			setFieldValue("metric", "");
 		}

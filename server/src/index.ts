@@ -15,6 +15,7 @@ import cors from "cors";
 import { google } from "googleapis";
 import papa from "papaparse";
 import path from "path";
+import rateLimit from "express-rate-limit";
 
 import {
 	validateAnalyticsSubmission,
@@ -34,6 +35,11 @@ const upload = multer({
 			return cb(null, false);
 		}
 	},
+});
+
+const apiLimiter = rateLimit({
+	windowMs: 15 * 60 * 1000, // 15 minutes
+	max: 100,
 });
 
 const googleAccounts = google.analytics("v3");
@@ -69,6 +75,7 @@ const main = async () => {
 
 	app.use(express.static(path.join(__dirname, "../../../client/", "build")));
 
+	app.use("/analytics/", apiLimiter);
 	app.use(
 		bodyParser.urlencoded({
 			extended: false,
@@ -159,7 +166,6 @@ const main = async () => {
 
 								return {
 									ds: data,
-									//[metricName]: row.metrics[0].values[0],
 									y: row.metrics[0].values[0],
 								};
 							}

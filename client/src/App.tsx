@@ -2,6 +2,7 @@ import * as React from "react";
 import { Box, Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/core";
 import { FormikErrors } from "formik";
 import axios from "axios";
+import SEO from "react-seo-component";
 
 import { toErrorMap } from "./utils/toErrorMap";
 
@@ -76,6 +77,18 @@ const App = () => {
 
 	return (
 		<>
+			<SEO
+				title={"Home"}
+				titleTemplate={"Propheteer"}
+				titleSeparator={`-`}
+				description={
+					"Propheteer is a tool built on top of Facebook's Prophet predictive modeling software, allowing for quick and  easy way to forecast Google Analytics or time series data."
+				}
+				pathname={"https://propheteer.grantstoltz.com"}
+				siteLanguage={"en"}
+				siteLocale={"en_gb"}
+				twitterUsername={"@grantstoltz"}
+			/>
 			<Layout>
 				<Tabs variant="enclosed">
 					<TabList>

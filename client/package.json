@@ -22,8 +22,10 @@
 		"react-datepicker": "^3.2.2",
 		"react-dom": "^16.13.1",
 		"react-gtm-module": "^2.0.11",
+		"react-helmet": "^6.1.0",
 		"react-router-dom": "^5.2.0",
 		"react-scripts": "3.4.3",
+		"react-seo-component": "^2.0.2",
 		"use-async-effect": "^2.2.2"
 	},
 	"devDependencies": {
