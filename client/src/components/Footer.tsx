@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Flex, Box } from "@chakra-ui/core";
+import { Flex, Box, Link } from "@chakra-ui/core";
 import { MenuItems } from "../components/MenuItems";
 
 interface Footer {}
@@ -19,6 +19,10 @@ export const Footer = (props: Footer) => {
 		>
 			<Box>
 				<MenuItems to="/privacy">Privacy Policy</MenuItems>
+			</Box>
+
+			<Box>
+				Created by <Link href="https://grantstoltz.com">Grant Stoltz</Link>
 			</Box>
 		</Flex>
 	);

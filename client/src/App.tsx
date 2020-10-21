@@ -61,6 +61,7 @@ const App = () => {
 		const response = await axios.post(`/analytics/data`, postObj, {
 			withCredentials: true,
 		});
+		console.log(response.data);
 		if (response.data?.errors) {
 			setErrors(toErrorMap(response.data.errors));
 		} else if (response.data.forecast.length && response.data.actual.length) {
