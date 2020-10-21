@@ -17,6 +17,7 @@ export const Wrapper: React.FC<WrapperProps> = ({
 			paddingLeft={2}
 			paddingRight={2}
 			mx="auto"
+			minH="70vh"
 			maxW={variant === "regular" ? "800px" : "400px"}
 			w="100%"
 		>

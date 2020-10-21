@@ -1,5 +1,11 @@
 import * as React from "react";
-import { FormControl, FormLabel, Select } from "@chakra-ui/core";
+import {
+	FormControl,
+	FormErrorMessage,
+	FormLabel,
+	Select,
+} from "@chakra-ui/core";
+import { useField } from "formik";
 
 interface Option {
 	id: string;
@@ -12,10 +18,10 @@ type SelectFieldProps = React.InputHTMLAttributes<HTMLInputElement> & {
 	id: string;
 	label: string;
 	name: string;
-	value: string;
+	// value: string;
 	options: Option[];
 	isDisabled?: boolean | undefined;
-	onChange: ((event: React.ChangeEvent<HTMLInputElement>) => void) &
+	onChange: ((event: React.ChangeEvent<HTMLSelectElement>) => void) &
 		((
 			field: string,
 			value: any,
@@ -26,17 +32,11 @@ type SelectFieldProps = React.InputHTMLAttributes<HTMLInputElement> & {
 // '' => false
 // 'error message stuff' => true
 
-export const SelectField: React.FC<SelectFieldProps> = ({
-	id,
-	name,
-	label,
-	value,
-	isDisabled,
-	options,
-	size: _,
-	onChange,
-	...props
-}) => {
+export const SelectField: React.FC<SelectFieldProps> = ({ ...props }) => {
+	const { label, options, name, onChange, isDisabled } = props;
+
+	const [field, { error }] = useField(props);
+
 	const renderOptionName = (element: Option) => {
 		if (name === "metric" || name === "account") {
 			return element.name;
@@ -46,21 +46,16 @@ export const SelectField: React.FC<SelectFieldProps> = ({
 	};
 
 	return (
-		<FormControl
-		// isInvalid={!!error}
-		>
+		<FormControl isInvalid={!!error}>
 			<FormLabel htmlFor={name}>{label}</FormLabel>
 			<Select
-				id={id}
-				name={name}
-				as="select"
-				value={value}
+				{...field}
 				isDisabled={isDisabled}
-				// @ts-ignore
+				as="select"
 				onChange={onChange}
 			>
 				<option value="None">{`Select ${label}`}</option>
-				{options.length
+				{props.options.length
 					? options.map((element, index) => {
 							return (
 								<option
@@ -74,7 +69,7 @@ export const SelectField: React.FC<SelectFieldProps> = ({
 					  })
 					: null}
 			</Select>
-			{/* //{error ? <FormErrorMessage>{error}</FormErrorMessage> : null} */}
+			{error ? <FormErrorMessage>{error}</FormErrorMessage> : null}
 		</FormControl>
 	);
 };

@@ -6,6 +6,7 @@ import TagManager from "react-gtm-module";
 
 import App from "./App";
 import About from "./About";
+import Privacy from "./Privacy";
 
 import theme from "./theme";
 import "react-datepicker/dist/react-datepicker.css";
@@ -28,6 +29,9 @@ ReactDOM.render(
 					</Route>
 					<Route exact path="/about">
 						<About />
+					</Route>
+					<Route exact path="/privacy">
+						<Privacy />
 					</Route>
 				</Switch>
 			</BrowserRouter>
