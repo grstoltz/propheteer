@@ -22,7 +22,7 @@ export const Footer = (props: Footer) => {
 			</Box>
 
 			<Box>
-				Created by <Link href="https://grantstoltz.com">Grant Stoltz</Link>
+				<Link href="https://grantstoltz.com">Created by Grant Stoltz</Link>
 			</Box>
 		</Flex>
 	);

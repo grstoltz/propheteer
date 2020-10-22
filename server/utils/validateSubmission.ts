@@ -229,7 +229,7 @@ export const validateAnalyticsSubmission = (
 	req: Request,
 	res: Response,
 	next: NextFunction
-) => {
+): void => {
 	validateRequest(req, res, next, analyticsSubmissionSchema);
 };
 
@@ -237,7 +237,7 @@ export const validatePropertiesSubmission = (
 	req: Request,
 	res: Response,
 	next: NextFunction
-) => {
+): void => {
 	validateRequest(req, res, next, propertiesSchema);
 };
 
@@ -245,7 +245,7 @@ export const validateViewsSubmission = (
 	req: Request,
 	res: Response,
 	next: NextFunction
-) => {
+): void => {
 	validateRequest(req, res, next, viewsSchema);
 };
 
@@ -253,7 +253,7 @@ export const validateMetricsSubmission = (
 	req: Request,
 	res: Response,
 	next: NextFunction
-) => {
+): void => {
 	validateRequest(req, res, next, metricsSchema);
 };
 
@@ -261,6 +261,6 @@ export const validateCsvSubmission = (
 	req: Request,
 	res: Response,
 	next: NextFunction
-) => {
+): void => {
 	validateRequest(req, res, next, csvSchema);
 };

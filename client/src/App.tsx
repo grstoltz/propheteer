@@ -1,5 +1,14 @@
 import * as React from "react";
-import { Box, Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/core";
+import {
+	Box,
+	Tabs,
+	TabList,
+	TabPanels,
+	Tab,
+	TabPanel,
+	Heading,
+	Text,
+} from "@chakra-ui/core";
 import { FormikErrors } from "formik";
 import axios from "axios";
 import SEO from "react-seo-component";
@@ -89,8 +98,12 @@ const App = () => {
 				siteLocale={"en_gb"}
 				twitterUsername={"@grantstoltz"}
 			/>
+
 			<Layout>
-				<Tabs variant="enclosed">
+				<Heading as="h1">Propheteer</Heading>
+				<Text>The easiest way to predict the future of your data.</Text>
+
+				<Tabs mt={4} variant="enclosed">
 					<TabList>
 						<Tab>Forecast Using Google Analytics Data</Tab>
 						<Tab>Forecast Using a CSV File</Tab>

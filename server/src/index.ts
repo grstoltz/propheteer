@@ -3,7 +3,7 @@ dotenv.config();
 
 import { __prod__, COOKIE_NAME } from "./constants";
 
-import express from "express";
+import express, { Request, Response } from "express";
 import axios, { AxiosResponse } from "axios";
 import session from "express-session";
 import Redis from "ioredis";
@@ -113,7 +113,7 @@ const main = async () => {
 	app.post(
 		"/analytics/data",
 		[isAuth, validateAnalyticsSubmission],
-		async (req: any, res: any) => {
+		async (req: Express.Session, res: any) => {
 			oauth2Client.setCredentials({
 				access_token: req.session?.token,
 			});
