@@ -10,7 +10,7 @@ export interface ParsedData {
 	ds: string;
 }
 
-export interface View {
+export interface GAResponse {
 	name: string;
 	id: string;
 }

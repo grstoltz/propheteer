@@ -134,8 +134,8 @@ const Home = () => {
 						</Flex>
 						<Text mt={2} color="black">
 							You can quickly and securely connect to your Google
-							Analytics account and quickly create forecasts from any
-							metric available to better inform your business decisions.
+							Analytics account and create forecasts from any metric
+							available to your to better inform your business decisions.
 						</Text>
 					</Box>
 					<Box {...flexSettings}>

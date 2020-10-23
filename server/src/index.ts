@@ -16,7 +16,7 @@ import papa from "papaparse";
 import path from "path";
 import rateLimit from "express-rate-limit";
 
-import { FlaskResponse, ParsedData, View } from "./types";
+import { FlaskResponse, ParsedData, GAResponse } from "./types";
 import { __prod__, COOKIE_NAME } from "./constants";
 
 import {
@@ -215,10 +215,10 @@ const main = async (): Promise<void> => {
 					access_token: tokens?.access_token,
 				});
 				if (__prod__) {
-					res.redirect("/");
+					res.redirect("/forecast");
 					return;
 				}
-				res.redirect("http://localhost:3000");
+				res.redirect("http://localhost:3000/forecast");
 			} else {
 				throw new Error("Error: " + err);
 			}
@@ -241,14 +241,14 @@ const main = async (): Promise<void> => {
 						console.error("Error: " + err);
 						res.send("An error occurred");
 					} else if (data) {
-						let views: any = [];
+						let accounts: GAResponse[] = [];
 						data.data.items.forEach((view: any) => {
-							views.push({
+							accounts.push({
 								name: view.name,
 								id: view.id,
 							});
 						});
-						res.send({ type: "views", results: views });
+						res.send({ type: "views", results: accounts });
 					}
 				}
 			);
@@ -273,14 +273,14 @@ const main = async (): Promise<void> => {
 						console.error("Error: " + err);
 						res.send("An error occurred");
 					} else if (data) {
-						let views: any = [];
+						let properties: GAResponse[] = [];
 						data.data.items.forEach((view: any) => {
-							views.push({
+							properties.push({
 								name: view.name,
 								id: view.id,
 							});
 						});
-						res.send({ type: "views", results: views });
+						res.send({ type: "properties", results: properties });
 					}
 				}
 			);
@@ -308,7 +308,7 @@ const main = async (): Promise<void> => {
 						res.send("An error occurred");
 						return;
 					} else if (data) {
-						let views: View[] = [];
+						let views: GAResponse[] = [];
 						data.data.items.forEach((view: any): void => {
 							views.push({
 								name: view.name,
@@ -479,7 +479,7 @@ const main = async (): Promise<void> => {
 		period: string
 	): Promise<FlaskResponse> => {
 		try {
-			const pythonResponse: FlaskResponse = await axios.post(
+			const flaskResponse: FlaskResponse = await axios.post(
 				__prod__
 					? (process.env.PROPHETEER_API_URL as string)
 					: "http://localhost:8080/api/forecast/",
@@ -488,10 +488,10 @@ const main = async (): Promise<void> => {
 					period,
 				}
 			);
-			if (!pythonResponse.data) {
+			if (!flaskResponse.data) {
 				throw new Error("Data not found");
 			} else {
-				return pythonResponse.data;
+				return flaskResponse.data;
 			}
 		} catch (e) {
 			return e;
