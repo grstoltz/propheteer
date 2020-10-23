@@ -97,7 +97,7 @@ export const GAForm: React.FC<GAFormProps> = ({ ...props }) => {
 	};
 
 	const handleAccountChange = async (
-		e: any,
+		e: React.ChangeEvent<HTMLSelectElement>,
 		setFieldValue: any,
 		values: any
 	) => {
@@ -119,7 +119,7 @@ export const GAForm: React.FC<GAFormProps> = ({ ...props }) => {
 	};
 
 	const handlePropertyChange = async (
-		e: any,
+		e: React.ChangeEvent<HTMLSelectElement>,
 		setFieldValue: any,
 		values: any
 	) => {
@@ -134,7 +134,11 @@ export const GAForm: React.FC<GAFormProps> = ({ ...props }) => {
 		}
 	};
 
-	const handleViewChange = async (e: any, setFieldValue: any, values: any) => {
+	const handleViewChange = async (
+		e: React.ChangeEvent<HTMLSelectElement>,
+		setFieldValue: any,
+		values: any
+	) => {
 		const { selectedOptions, value } = e.target;
 		const optionId = selectedOptions[0].id;
 		if (optionId) {
@@ -145,12 +149,16 @@ export const GAForm: React.FC<GAFormProps> = ({ ...props }) => {
 				values.propertyId,
 				optionId
 			);
+			console.log(_metrics);
 			setMetrics(_metrics.data);
 			setFieldValue("metric", "");
 		}
 	};
 
-	const handleMetricChange = (e: any, setFieldValue: any) => {
+	const handleMetricChange = (
+		e: React.ChangeEvent<HTMLSelectElement>,
+		setFieldValue: any
+	) => {
 		const { selectedOptions, value } = e.target;
 		const optionId = selectedOptions[0].id;
 		if (optionId) {

@@ -31,6 +31,7 @@ export const NavBar = (props: NavBarProps) => {
 				color="teal.300"
 			>
 				<MenuItems to="/">Home</MenuItems>
+				<MenuItems to="/forecast">Forecast My Data</MenuItems>
 				<MenuItems to="/about">About </MenuItems>
 			</Box>
 		</Flex>

@@ -1,29 +1,20 @@
 import * as React from "react";
-import {
-	Box,
-	Tabs,
-	TabList,
-	TabPanels,
-	Tab,
-	TabPanel,
-	Heading,
-	Text,
-} from "@chakra-ui/core";
+import { Box, Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/core";
 import { FormikErrors } from "formik";
 import axios from "axios";
 import SEO from "react-seo-component";
 
-import { toErrorMap } from "./utils/toErrorMap";
+import { toErrorMap } from "../utils/toErrorMap";
 
-import { Layout } from "./components/Layout";
+import { Layout } from "../components/Layout";
 
-import Chart from "./components/Chart";
-import { CSVForm } from "./components/CSVForm";
-import { GAForm } from "./components/GAForm";
+import Chart from "../components/Chart";
+import { CSVForm } from "../components/CSVForm";
+import { GAForm } from "../components/GAForm";
 
 const { useState } = React;
 
-const App = () => {
+const Forecast = () => {
 	const [actualData, setActualData] = useState([]);
 	const [forecastData, setForecastData] = useState([]);
 
@@ -87,7 +78,7 @@ const App = () => {
 	return (
 		<>
 			<SEO
-				title={"Home"}
+				title={"Forecast"}
 				titleTemplate={"Propheteer"}
 				titleSeparator={`-`}
 				description={
@@ -100,9 +91,6 @@ const App = () => {
 			/>
 
 			<Layout>
-				<Heading as="h1">Propheteer</Heading>
-				<Text>The easiest way to predict the future of your data.</Text>
-
 				<Tabs mt={4} variant="enclosed">
 					<TabList>
 						<Tab>Forecast Using Google Analytics Data</Tab>
@@ -133,4 +121,4 @@ const App = () => {
 	);
 };
 
-export default App;
+export default Forecast;

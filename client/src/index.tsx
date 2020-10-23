@@ -4,13 +4,14 @@ import { BrowserRouter, Switch, Route } from "react-router-dom";
 import { ThemeProvider, CSSReset } from "@chakra-ui/core";
 import TagManager from "react-gtm-module";
 
-import App from "./App";
-import About from "./About";
-import Privacy from "./Privacy";
+import Home from "./pages/Home";
+import Forecast from "./pages/Forecast";
+import About from "./pages/About";
+import Privacy from "./pages/Privacy";
 
 import theme from "./theme";
 import "react-datepicker/dist/react-datepicker.css";
-import "./date-picker.css";
+import "./static/date-picker.css";
 
 const tagManagerArgs = {
 	gtmId: "GTM-W2BVKQ3",
@@ -25,7 +26,10 @@ ReactDOM.render(
 			<BrowserRouter>
 				<Switch>
 					<Route exact path="/">
-						<App />
+						<Home />
+					</Route>
+					<Route exact path="/forecast">
+						<Forecast />
 					</Route>
 					<Route exact path="/about">
 						<About />

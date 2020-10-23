@@ -2,7 +2,7 @@ import * as React from "react";
 import { Text, Link } from "@chakra-ui/core";
 import SEO from "react-seo-component";
 
-import { Layout } from "./components/Layout";
+import { Layout } from "../components/Layout";
 
 const About = () => {
 	return (

@@ -9,7 +9,7 @@ type DatePickerFieldProps = React.InputHTMLAttributes<HTMLInputElement> & {
 	onChange: ((event: React.ChangeEvent<HTMLInputElement>) => void) &
 		((
 			field: string,
-			value: any,
+			value: Date,
 			shouldValidate?: boolean | undefined
 		) => void);
 };
@@ -41,7 +41,7 @@ export const DatePickerField: React.FC<DatePickerFieldProps> = ({
 				onKeyDown={(e) => e.preventDefault()}
 				dateFormat={"yyyy/MM/dd"}
 				selected={(field.value && new Date(field.value)) || null}
-				onChange={(val: any) => {
+				onChange={(val: Date) => {
 					setFieldValue(field.name, formatDate(val));
 				}}
 			/>

@@ -804,6 +804,17 @@ gaxios@^3.0.0:
     is-stream "^2.0.0"
     node-fetch "^2.3.0"
 
+gaxios@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/gaxios/-/gaxios-4.0.0.tgz#eb01a923d5fd920174f05f9ccd4c743032c177a6"
+  integrity sha512-Ge+S+8L8xe/LAjC2tHXFuBMVhjjm4sMevjEHshJeMZ0d37fspa9BO8WEMlYxk4lyydR/v63iHWZZ1Ri7hAqzSg==
+  dependencies:
+    abort-controller "^3.0.0"
+    extend "^3.0.2"
+    https-proxy-agent "^5.0.0"
+    is-stream "^2.0.0"
+    node-fetch "^2.3.0"
+
 gcp-metadata@^4.1.0:
   version "4.2.0"
   resolved "https://registry.yarnpkg.com/gcp-metadata/-/gcp-metadata-4.2.0.tgz#3b424355ccdc240ee07c5791e2fd6a60a283d89a"

@@ -25,8 +25,11 @@ export const CSVUploadField: React.FC<CSVUploadFieldProps> = ({ ...props }) => {
 				type="file"
 				// {...props}
 				id={field.name}
-				onChange={(event: any) => {
-					setFieldValue(field.name, event.currentTarget.files[0]);
+				onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+					setFieldValue(
+						field.name,
+						event?.currentTarget?.files ? [0] : File
+					);
 				}}
 			/>
 			{error ? <FormErrorMessage>{error}</FormErrorMessage> : null}

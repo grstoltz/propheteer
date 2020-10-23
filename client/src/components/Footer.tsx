@@ -2,9 +2,9 @@ import * as React from "react";
 import { Flex, Box, Link } from "@chakra-ui/core";
 import { MenuItems } from "../components/MenuItems";
 
-interface Footer {}
+interface FooterProps {}
 
-export const Footer = (props: Footer) => {
+export const Footer = (props: FooterProps) => {
 	return (
 		<Flex
 			align="center"

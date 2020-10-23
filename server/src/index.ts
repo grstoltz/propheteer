@@ -1,8 +1,6 @@
 import * as dotenv from "dotenv";
 dotenv.config();
 
-import { __prod__, COOKIE_NAME } from "./constants";
-
 import express, { Request, Response } from "express";
 import axios, { AxiosResponse } from "axios";
 import session from "express-session";
@@ -12,10 +10,14 @@ import * as bodyParser from "body-parser";
 import logger from "morgan";
 import multer from "multer";
 import cors from "cors";
-import { google } from "googleapis";
+import { analytics_v3, google } from "googleapis";
+import { GaxiosResponse } from "gaxios";
 import papa from "papaparse";
 import path from "path";
 import rateLimit from "express-rate-limit";
+
+import { FlaskResponse, ParsedData, View } from "./types";
+import { __prod__, COOKIE_NAME } from "./constants";
 
 import {
 	validateAnalyticsSubmission,
@@ -64,7 +66,7 @@ const url = oauth2Client.generateAuthUrl({
 const RedisStore = connectRedis(session);
 const redis = new Redis(process.env.REDIS_URL);
 
-const main = async () => {
+const main = async (): Promise<void> => {
 	const app = express();
 
 	if (__prod__) {
@@ -113,7 +115,7 @@ const main = async () => {
 	app.post(
 		"/analytics/data",
 		[isAuth, validateAnalyticsSubmission],
-		async (req: Express.Session, res: any) => {
+		async (req: Request, res: Response): Promise<void> => {
 			oauth2Client.setCredentials({
 				access_token: req.session?.token,
 			});
@@ -151,13 +153,13 @@ const main = async () => {
 						reportRequests: repReq,
 					},
 				},
-				async (err: any, data: any) => {
+				async (err: Error, data: any): Promise<void> => {
 					if (err) {
 						console.error("Error: " + err);
 						res.send("An error occurred");
 						return;
 					} else if (data) {
-						const googleResultsArr = data.data.reports[0].data.rows.map(
+						const googleResultsArr: ParsedData[] = data.data.reports[0].data.rows.map(
 							(row: any) => {
 								const data = row.dimensions[0].replace(
 									/(\d{4})(\d{2})(\d{2})/g,
@@ -170,12 +172,12 @@ const main = async () => {
 								};
 							}
 						);
-						const forecastResults = await forecast(
+						const forecastResults: FlaskResponse = await forecast(
 							googleResultsArr,
 							period
 						);
 
-						if (forecastResults.code) {
+						if (forecastResults?.code) {
 							res.send({
 								errors: [
 									{
@@ -198,11 +200,11 @@ const main = async () => {
 		}
 	);
 
-	app.get("/auth/google", (_, res) => {
+	app.get("/auth/google", (_, res: Response): void => {
 		res.redirect(url);
 	});
 
-	app.get("/login/google/return", (req, res) => {
+	app.get("/login/google/return", (req: Request, res: Response): void => {
 		oauth2Client.getToken(String(req.query.code), (err, tokens) => {
 			if (!req.session) {
 				throw new Error("No Session");
@@ -223,36 +225,40 @@ const main = async () => {
 		});
 	});
 
-	app.get("/analytics/accounts", isAuth, (req, res) => {
-		oauth2Client.setCredentials({
-			access_token: req.session?.token,
-		});
-		googleAccounts.management.accounts.list(
-			{
-				auth: oauth2Client,
-			},
-			(err, data: any) => {
-				if (err) {
-					console.error("Error: " + err);
-					res.send("An error occurred");
-				} else if (data) {
-					let views: any = [];
-					data.data.items.forEach((view: any) => {
-						views.push({
-							name: view.name,
-							id: view.id,
+	app.get(
+		"/analytics/accounts",
+		isAuth,
+		(req: Request, res: Response): void => {
+			oauth2Client.setCredentials({
+				access_token: req.session?.token,
+			});
+			googleAccounts.management.accounts.list(
+				{
+					auth: oauth2Client,
+				},
+				(err, data: any) => {
+					if (err) {
+						console.error("Error: " + err);
+						res.send("An error occurred");
+					} else if (data) {
+						let views: any = [];
+						data.data.items.forEach((view: any) => {
+							views.push({
+								name: view.name,
+								id: view.id,
+							});
 						});
-					});
-					res.send({ type: "views", results: views });
+						res.send({ type: "views", results: views });
+					}
 				}
-			}
-		);
-	});
+			);
+		}
+	);
 
 	app.post(
 		"/analytics/properties",
 		[isAuth, validatePropertiesSubmission],
-		(req: any, res: any) => {
+		(req: Request, res: Response): void => {
 			const { accountId } = req.body;
 			oauth2Client.setCredentials({
 				access_token: req.session?.token,
@@ -284,7 +290,7 @@ const main = async () => {
 	app.post(
 		"/analytics/views",
 		[isAuth, validateViewsSubmission],
-		(req: any, res: any) => {
+		(req: Request, res: Response) => {
 			const { accountId, propertyId: webPropertyId } = req.body;
 
 			oauth2Client.setCredentials({
@@ -296,14 +302,14 @@ const main = async () => {
 					accountId,
 					webPropertyId,
 				},
-				(err: any, data: any) => {
+				(err: any, data: any): void => {
 					if (err) {
 						console.error("Error: " + err);
 						res.send("An error occurred");
 						return;
 					} else if (data) {
-						let views: any = [];
-						data.data.items.forEach((view: any) => {
+						let views: View[] = [];
+						data.data.items.forEach((view: any): void => {
 							views.push({
 								name: view.name,
 								id: view.id,
@@ -319,14 +325,14 @@ const main = async () => {
 	app.post(
 		"/analytics/metrics",
 		[isAuth, validateMetricsSubmission],
-		async (req: any, res: any) => {
+		async (req: Request, res: Response): Promise<void> => {
 			const {
 				accountId,
 				propertyId: webPropertyId,
 				viewId: profileId,
 			} = req.body;
 
-			const baseMetrics = await axios.get(
+			const baseMetrics: AxiosResponse = await axios.get(
 				"https://www.googleapis.com/analytics/v3/metadata/ga/columns"
 			);
 
@@ -334,12 +340,14 @@ const main = async () => {
 				access_token: req.session?.token,
 			});
 
-			const userMetrics = await googleAccounts.management.goals.list({
-				auth: oauth2Client,
-				accountId,
-				webPropertyId,
-				profileId,
-			});
+			const userMetrics: GaxiosResponse<analytics_v3.Schema$Goals> = await googleAccounts.management.goals.list(
+				{
+					auth: oauth2Client,
+					accountId,
+					webPropertyId,
+					profileId,
+				}
+			);
 
 			const metricArr = baseMetrics.data.items.map((e: any) => {
 				if (
@@ -363,7 +371,7 @@ const main = async () => {
 	app.post(
 		"/csv/data",
 		[upload.single("file"), validateCsvSubmission],
-		async (req: any, res: any) => {
+		async (req: Request, res: Response): Promise<void> => {
 			if (
 				!req.file ||
 				req.file.fieldname !== "file" ||
@@ -420,30 +428,35 @@ const main = async () => {
 				return;
 			}
 
-			let dimensionPosition = 0;
-			let valuePosition = 1;
+			let dimensionPosition: number = 0;
+			let valuePosition: number = 1;
 
 			if (!isValidDate(Object.values(csvData[0])[0] as string)) {
 				dimensionPosition = 1;
 				valuePosition = 0;
 			}
 
-			const csvArr = csvData.map((row: any) => {
-				return {
-					ds: Object.values(row)[dimensionPosition],
-					y: Object.values(row)[valuePosition],
-				};
-			});
+			const csvArr: ParsedData[] = csvData.map(
+				(row: any): ParsedData => {
+					return {
+						ds: Object.values(row)[dimensionPosition] as string,
+						y: Object.values(row)[valuePosition] as string,
+					};
+				}
+			);
 
 			try {
-				const forecastResults = await forecast(csvArr, period);
+				const forecastResults: FlaskResponse = await forecast(
+					csvArr,
+					period
+				);
 
 				res.send({
 					forecast: forecastResults,
 					actual: csvArr,
 				});
 			} catch (e) {
-				let message = "There was an error parsing your CSV file";
+				let message: string = "There was an error parsing your CSV file";
 
 				if (e.data?.message === "KeyError") {
 					message =
@@ -461,9 +474,12 @@ const main = async () => {
 		}
 	);
 
-	const forecast = async (data: unknown[], period: string) => {
+	const forecast = async (
+		data: unknown[],
+		period: string
+	): Promise<FlaskResponse> => {
 		try {
-			const pythonResponse: AxiosResponse = await axios.post(
+			const pythonResponse: FlaskResponse = await axios.post(
 				__prod__
 					? (process.env.PROPHETEER_API_URL as string)
 					: "http://localhost:8080/api/forecast/",
@@ -483,18 +499,18 @@ const main = async () => {
 	};
 
 	if (process.env.NODE_ENV === "production") {
-		app.get("*", function (_, res) {
+		app.get("*", function (_, res: Response): void {
 			res.sendFile(
 				path.join(__dirname, "../../../client/", "build", "index.html")
 			);
 		});
 	}
 
-	app.listen(4000, () => {
+	app.listen(4000, (): void => {
 		console.log("Server started at http://localhost:4000");
 	});
 };
 
-main().catch((err) => {
+main().catch((err: Error): void => {
 	console.error(err);
 });

@@ -24,13 +24,10 @@ type SelectFieldProps = React.InputHTMLAttributes<HTMLInputElement> & {
 	onChange: ((event: React.ChangeEvent<HTMLSelectElement>) => void) &
 		((
 			field: string,
-			value: any,
+			value: string,
 			shouldValidate?: boolean | undefined
 		) => void);
 };
-
-// '' => false
-// 'error message stuff' => true
 
 export const SelectField: React.FC<SelectFieldProps> = ({ ...props }) => {
 	const { label, options, name, onChange, isDisabled } = props;
