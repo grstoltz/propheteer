@@ -4,7 +4,7 @@ import axios from "axios";
 
 import { CSVLink } from "react-csv";
 
-import { Link, Box, Button, Flex, Spinner } from "@chakra-ui/core";
+import { Link, Box, Button, Flex, Spinner, Image } from "@chakra-ui/core";
 import { Formik, Form } from "formik";
 
 import { SelectField } from "../components/SelectField";
@@ -12,6 +12,8 @@ import { InputField } from "../components/InputField";
 import { DatePickerField } from "../components/DatePickerField";
 
 import { yesterday, oneYear } from "../utils/dateHelper";
+
+import googleButton from "../static/btn_google_signin_light_normal_web@2x.png";
 
 const { useState } = React;
 
@@ -317,13 +319,14 @@ export const GAForm: React.FC<GAFormProps> = ({ ...props }) => {
 							) : null}
 							{authorized ? null : (
 								<Link
+									ml={4}
 									href={
 										process.env.NODE_ENV === "production"
 											? `/auth/google`
 											: "http://localhost:4000/auth/google"
 									}
 								>
-									<Button ml={4}>Login to Google Analytics</Button>
+									<Image h="2.5rem" src={googleButton} />
 								</Link>
 							)}
 						</Flex>

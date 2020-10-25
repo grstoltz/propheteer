@@ -207,10 +207,12 @@ const main = async (): Promise<void> => {
 	app.get("/login/google/return", (req: Request, res: Response): void => {
 		oauth2Client.getToken(String(req.query.code), (err, tokens) => {
 			if (!req.session) {
-				throw new Error("No Session");
+				throw new Error("No session store");
 			}
 			if (!err) {
 				req.session.token = tokens?.access_token;
+				req.session.expiry_date = tokens?.expiry_date;
+
 				oauth2Client.setCredentials({
 					access_token: tokens?.access_token,
 				});

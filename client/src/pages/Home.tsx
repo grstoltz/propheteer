@@ -21,7 +21,6 @@ import csv from "../static/csv_logo.png";
 const flexSettings = {
 	flex: "1",
 	minW: "300x",
-	//textAlign: "center",
 	color: "white",
 	mx: 6,
 	mb: "6",
