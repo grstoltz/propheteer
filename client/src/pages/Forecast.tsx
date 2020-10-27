@@ -3,6 +3,7 @@ import { Box, Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/core";
 import { FormikErrors } from "formik";
 import axios from "axios";
 import SEO from "react-seo-component";
+import ReactGA from "react-ga";
 
 import { toErrorMap } from "../utils/toErrorMap";
 
@@ -27,6 +28,7 @@ const Forecast = () => {
 			}>
 		) => void
 	) => {
+		const sendDate = new Date().getTime();
 		const file = values.file;
 		const period = values.period.toString();
 
@@ -38,6 +40,16 @@ const Forecast = () => {
 			headers: {
 				"content-type": "multipart/form-data",
 			},
+		});
+
+		const receiveDate = new Date().getTime();
+
+		const responseTime = receiveDate - sendDate;
+
+		ReactGA.event({
+			category: "CSV Form",
+			action: "Submit",
+			label: responseTime.toString(),
 		});
 
 		if (response.data?.errors) {
@@ -58,10 +70,23 @@ const Forecast = () => {
 			metricName: metric,
 			period,
 		};
+
+		const sendDate = new Date().getTime();
+
 		const response = await axios.post(`/analytics/data`, postObj, {
 			withCredentials: true,
 		});
-		console.log(response.data);
+
+		const receiveDate = new Date().getTime();
+
+		const responseTime = receiveDate - sendDate;
+
+		ReactGA.event({
+			category: "Google Analytics Form",
+			action: "Submit",
+			label: responseTime.toString(),
+		});
+
 		if (response.data?.errors) {
 			setErrors(toErrorMap(response.data.errors));
 		} else if (response.data.forecast.length && response.data.actual.length) {

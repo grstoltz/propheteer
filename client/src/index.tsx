@@ -3,6 +3,7 @@ import * as ReactDOM from "react-dom";
 import { BrowserRouter, Switch, Route } from "react-router-dom";
 import { ThemeProvider, CSSReset } from "@chakra-ui/core";
 import TagManager from "react-gtm-module";
+import ReactGA from "react-ga";
 
 import Home from "./pages/Home";
 import Forecast from "./pages/Forecast";
@@ -16,6 +17,8 @@ import "./static/date-picker.css";
 const tagManagerArgs = {
 	gtmId: "GTM-W2BVKQ3",
 };
+
+ReactGA.initialize("UA-77017554-2");
 
 TagManager.initialize(tagManagerArgs);
 

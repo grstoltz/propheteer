@@ -16,6 +16,7 @@ interface CSVFormProps {
 
 export const CSVForm: React.FC<CSVFormProps> = ({ ...props }) => {
 	const { handleSubmit, forecastData, resetData } = props;
+
 	return (
 		<>
 			<Formik
@@ -43,7 +44,10 @@ export const CSVForm: React.FC<CSVFormProps> = ({ ...props }) => {
 									name="file"
 									label="File Upload"
 									//@ts-ignore
-									value={values.file}
+									//value={values.file}
+									// onChange={(event: any) => {
+									// 	handleFileChange(event, setFieldValue);
+									// }}
 								/>
 							</Box>
 							<Box mt={2}>
