@@ -88,6 +88,7 @@ const Forecast = () => {
 		});
 
 		if (response.data?.errors) {
+			console.log(response.data.errors);
 			setErrors(toErrorMap(response.data.errors));
 		} else if (response.data.forecast.length && response.data.actual.length) {
 			setForecastData(response.data.forecast);
