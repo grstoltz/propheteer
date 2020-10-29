@@ -127,7 +127,7 @@ const Forecast = () => {
 							<GAForm
 								forecastData={forecastData}
 								handleSubmit={handleGASubmit}
-								resetData={resetData}
+								//resetData={resetData}
 							/>
 						</TabPanel>
 						<TabPanel>

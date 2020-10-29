@@ -21,12 +21,10 @@ interface GAFormProps {
 	handleSubmit: (...args: any) => void;
 
 	forecastData: object[];
-
-	resetData: () => void;
 }
 
 export const GAForm: React.FC<GAFormProps> = ({ ...props }) => {
-	const { handleSubmit, forecastData, resetData } = props;
+	const { handleSubmit, forecastData } = props;
 
 	const [accounts, setAccounts] = useState([]);
 	// @ts-ignore
@@ -102,69 +100,6 @@ export const GAForm: React.FC<GAFormProps> = ({ ...props }) => {
 		);
 	};
 	// @ts-ignore
-	const handleAccountChange = async (
-		option: any,
-		setFieldValue: any,
-		values: any
-	) => {
-		const { label, value } = option;
-		if (value) {
-			setFieldValue("account", label);
-			setFieldValue("accountId", value);
-			const _properties = await getProperties(value);
-
-			setProperties(_properties.data.results);
-			setFieldValue("property", "");
-			setFieldValue("propertyId", 0);
-
-			if (values.accountId) {
-				setFieldValue("view", "");
-				setFieldValue("viewId", 0);
-			}
-		}
-	};
-	// @ts-ignore
-	const handlePropertyChange = async (
-		option: any,
-		setFieldValue: any,
-		values: any
-	) => {
-		const { label, value } = option;
-		if (value) {
-			setFieldValue("property", label);
-			setFieldValue("propertyId", value);
-			const _views = await getViews(values.accountId, value);
-			setViews(_views.data.results);
-			setFieldValue("view", "");
-		}
-	};
-	// @ts-ignore
-	const handleViewChange = async (
-		option: any,
-		setFieldValue: any,
-		values: any
-	) => {
-		const { label, value } = option;
-		if (value) {
-			setFieldValue("view", label);
-			setFieldValue("viewId", value);
-			const _metrics = await getMetrics(
-				values.accountId,
-				values.propertyId,
-				value
-			);
-			setMetrics(_metrics.data);
-			setFieldValue("metric", "");
-		}
-	};
-	// @ts-ignore
-	const handleMetricChange = (option: any, setFieldValue: any) => {
-		const { label, value } = option;
-		if (value) {
-			setFieldValue("metric", label);
-			setFieldValue("metricId", value);
-		}
-	};
 
 	return (
 		<>
@@ -212,7 +147,7 @@ export const GAForm: React.FC<GAFormProps> = ({ ...props }) => {
 				onSubmit={(values, { setErrors }) =>
 					handleSubmit(values, setErrors)
 				}
-				enableReinitialize={true}
+				enableReinitialize={false}
 			>
 				{(props) => {
 					const {
@@ -224,6 +159,62 @@ export const GAForm: React.FC<GAFormProps> = ({ ...props }) => {
 						handleReset,
 						setFieldValue,
 					} = props;
+					const handleAccountChange = async (option: any) => {
+						const { label, value } = option;
+						console.log("onChange", option);
+						if (value) {
+							setFieldValue("account", label);
+							setFieldValue("accountId", value);
+							const _properties = await getProperties(value);
+
+							setProperties(_properties.data.results);
+							setFieldValue("property", "");
+							setFieldValue("propertyId", 0);
+
+							if (values.accountId) {
+								setFieldValue("view", "");
+								setFieldValue("viewId", 0);
+							}
+						}
+					};
+					// @ts-ignore
+					const handlePropertyChange = async (option: any) => {
+						const { label, value } = option;
+						if (value) {
+							setFieldValue("property", label);
+							setFieldValue("propertyId", value);
+							const _views = await getViews(
+								values.accountId.toString(),
+								value
+							);
+							setViews(_views.data.results);
+							setFieldValue("view", "");
+						}
+					};
+					// @ts-ignore
+					const handleViewChange = async (option: any) => {
+						const { label, value } = option;
+						if (value) {
+							setFieldValue("view", label);
+							setFieldValue("viewId", value);
+							const _metrics = await getMetrics(
+								values.accountId.toString(),
+								values.propertyId.toString(),
+								value
+							);
+							setMetrics(_metrics.data);
+							setFieldValue("metric", "");
+						}
+					};
+					// @ts-ignore
+					const handleMetricChange = (option: any) => {
+						const { label, value } = option;
+						if (value) {
+							setFieldValue("metric", label);
+							setFieldValue("metricId", value);
+						}
+					};
+
 					return (
 						<Form onSubmit={handleSubmit}>
 							<Box mt={4}>
@@ -234,14 +225,7 @@ export const GAForm: React.FC<GAFormProps> = ({ ...props }) => {
 									value={values.account}
 									isDisabled={!accounts.length ? true : false}
 									options={accounts}
-									onChange={async (option: any) => {
-										//handleChange("account")(option.label);
-										handleAccountChange(
-											option,
-											setFieldValue,
-											values
-										);
-									}}
+									onChange={handleAccountChange}
 								/>
 							</Box>
 							<Box mt={4}>
@@ -252,13 +236,7 @@ export const GAForm: React.FC<GAFormProps> = ({ ...props }) => {
 									value={values.property}
 									isDisabled={!properties.length ? true : false}
 									options={properties}
-									onChange={(option: any) => {
-										handlePropertyChange(
-											option,
-											setFieldValue,
-											values
-										);
-									}}
+									onChange={handlePropertyChange}
 								/>
 							</Box>
 							<Box mt={4}>
@@ -269,9 +247,7 @@ export const GAForm: React.FC<GAFormProps> = ({ ...props }) => {
 									value={values.view}
 									isDisabled={!views.length ? true : false}
 									options={views}
-									onChange={(option: any) => {
-										handleViewChange(option, setFieldValue, values);
-									}}
+									onChange={handleViewChange}
 								/>
 							</Box>
 							<Box mt={4}>
@@ -282,9 +258,7 @@ export const GAForm: React.FC<GAFormProps> = ({ ...props }) => {
 									value={values.metric}
 									isDisabled={!metrics.length ? true : false}
 									options={metrics}
-									onChange={(option: any) => {
-										handleMetricChange(option, setFieldValue);
-									}}
+									onChange={handleMetricChange}
 								/>
 							</Box>
 							<Flex mt={4}>
@@ -317,11 +291,7 @@ export const GAForm: React.FC<GAFormProps> = ({ ...props }) => {
 								<Button
 									type="button"
 									className="outline"
-									onClick={() => {
-										setFieldValue("account", "");
-										handleReset();
-										resetData();
-									}}
+									onClick={handleReset}
 									isDisabled={!dirty || isSubmitting}
 								>
 									Reset

@@ -1,17 +1,17 @@
 import * as React from "react";
 import { FormControl, FormErrorMessage, FormLabel } from "@chakra-ui/core";
 import { useField, FieldProps } from "formik";
-import Select, { ValueType } from "react-select";
+import Select from "react-select";
 
 interface PropsType {
 	[x: string]: any;
 	name: string;
 }
 
-interface Option {
-	label: string;
-	value: string;
-}
+// interface Option {
+// 	label: string;
+// 	value: string;
+// }
 
 export const SelectField: React.FC<any & FieldProps> = ({
 	form,
@@ -19,10 +19,13 @@ export const SelectField: React.FC<any & FieldProps> = ({
 }: PropsType) => {
 	// This isn't an input, so instead of using the values in 'field' directly,
 	// we'll use 'meta' and 'helpers'.
+	//@ts-ignore
+	//console.log(props);
+	//@ts-ignore
 
-	const { label, options, name, isDisabled } = props;
+	const { label, options, name, isDisabled, onChange } = props;
 
-	const [field, { error }] = useField(name);
+	const [field, { error }] = useField(props);
 
 	const formattedOptions = options.map((obj: any) => {
 		if (props.id === "metric") {
@@ -39,17 +42,29 @@ export const SelectField: React.FC<any & FieldProps> = ({
 	//const { error } = meta;
 	// const { setValue } = helpers;
 
-	const onChange = (option: ValueType<Option | Option[]>) => {
-		form.setFieldValue(field.name, (option as Option).value);
-	};
-
 	const getValue = () => {
 		if (options) {
-			return options.find((option: any) => option.value === field.value);
+			const value = formattedOptions.find(
+				(option: any) => option.label === field.value
+			);
+			if (!value) {
+				return {
+					value: 0,
+					label: `Select ${field.name}...`,
+				};
+			}
+			return value;
 		} else {
-			return "" as any;
+			return {
+				value: 0,
+				label: `Select ${field.name}...`,
+			};
 		}
 	};
+	//@ts-ignore
+	// const { touched, error, value } = meta;
+	// //@ts-ignore
+	// const { setValue } = helpers;
 
 	return (
 		<FormControl isInvalid={!!error}>
@@ -61,8 +76,12 @@ export const SelectField: React.FC<any & FieldProps> = ({
 				isDisabled={isDisabled}
 				options={formattedOptions}
 				name={field.name}
-				onChange={onChange}
-				instanceId={props.id}
+				onChange={(option: any, action) => {
+					console.log(option);
+					console.log(action);
+					onChange(option);
+				}}
+				//onChange={onChange}
 			/>
 
 			{error ? <FormErrorMessage>{error}</FormErrorMessage> : null}
