@@ -20,15 +20,12 @@ export const CSVUploadField: React.FC<CSVUploadFieldProps> = ({ ...props }) => {
 		<FormControl isInvalid={!!error}>
 			<FormLabel htmlFor={field.name}>{props.label}</FormLabel>
 			<Input
-				// {...field}
 				type="file"
-				// {...props}
 				id={field.name}
 				onChange={(event: any) => {
 					setFieldValue(field.name, event?.currentTarget?.files[0]);
 				}}
 				value={props.value}
-				//onChange={props.onChange}
 			/>
 			{error ? <FormErrorMessage>{error}</FormErrorMessage> : null}
 		</FormControl>

@@ -21,17 +21,19 @@ interface GAFormProps {
 	handleSubmit: (...args: any) => void;
 
 	forecastData: object[];
+
+	resetData: () => void;
 }
 
 export const GAForm: React.FC<GAFormProps> = ({ ...props }) => {
-	const { handleSubmit, forecastData } = props;
+	const { handleSubmit, forecastData, resetData } = props;
 
 	const [accounts, setAccounts] = useState([]);
-	// @ts-ignore
+
 	const [properties, setProperties] = useState([]);
-	// @ts-ignore
+
 	const [views, setViews] = useState([]);
-	// @ts-ignore
+
 	const [metrics, setMetrics] = useState([]);
 
 	const [authorized, setAuthorized] = useState(true);
@@ -99,7 +101,6 @@ export const GAForm: React.FC<GAFormProps> = ({ ...props }) => {
 			}
 		);
 	};
-	// @ts-ignore
 
 	return (
 		<>
@@ -143,6 +144,7 @@ export const GAForm: React.FC<GAFormProps> = ({ ...props }) => {
 					startDate: oneYear,
 					endDate: yesterday,
 					period: 365,
+					general: null,
 				}}
 				onSubmit={(values, { setErrors }) =>
 					handleSubmit(values, setErrors)
@@ -161,7 +163,6 @@ export const GAForm: React.FC<GAFormProps> = ({ ...props }) => {
 					} = props;
 					const handleAccountChange = async (option: any) => {
 						const { label, value } = option;
-						console.log("onChange", option);
 						if (value) {
 							setFieldValue("account", label);
 							setFieldValue("accountId", value);
@@ -177,7 +178,7 @@ export const GAForm: React.FC<GAFormProps> = ({ ...props }) => {
 							}
 						}
 					};
-					// @ts-ignore
+
 					const handlePropertyChange = async (option: any) => {
 						const { label, value } = option;
 						if (value) {
@@ -191,12 +192,12 @@ export const GAForm: React.FC<GAFormProps> = ({ ...props }) => {
 							setFieldValue("view", "");
 						}
 					};
-					// @ts-ignore
 					const handleViewChange = async (option: any) => {
 						const { label, value } = option;
 						if (value) {
 							setFieldValue("view", label);
 							setFieldValue("viewId", value);
+
 							const _metrics = await getMetrics(
 								values.accountId.toString(),
 								values.propertyId.toString(),
@@ -206,7 +207,6 @@ export const GAForm: React.FC<GAFormProps> = ({ ...props }) => {
 							setFieldValue("metric", "");
 						}
 					};
-					// @ts-ignore
 					const handleMetricChange = (option: any) => {
 						const { label, value } = option;
 						if (value) {
@@ -254,7 +254,7 @@ export const GAForm: React.FC<GAFormProps> = ({ ...props }) => {
 								<SelectField
 									id="metric"
 									label="Metric"
-									name="metrc"
+									name="metric"
 									value={values.metric}
 									isDisabled={!metrics.length ? true : false}
 									options={metrics}
@@ -287,11 +287,19 @@ export const GAForm: React.FC<GAFormProps> = ({ ...props }) => {
 									onChange={handleChange}
 								/>
 							</Box>
-							<Flex mt={6}>
+							<Box>
+								<Text h="24px" style={{ color: "red" }}>
+									{props.errors.general}
+								</Text>
+							</Box>
+							<Flex mt={4}>
 								<Button
 									type="button"
 									className="outline"
-									onClick={handleReset}
+									onClick={() => {
+										handleReset();
+										resetData();
+									}}
 									isDisabled={!dirty || isSubmitting}
 								>
 									Reset

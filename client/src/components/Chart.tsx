@@ -11,7 +11,6 @@ interface ChartProps {
 	actualData?: data[];
 }
 
-/* Component */
 const Chart = (props: ChartProps) => {
 	const { actualData, forecastData } = props;
 

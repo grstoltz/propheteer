@@ -181,7 +181,7 @@ const main = async (): Promise<void> => {
 							res.send({
 								errors: [
 									{
-										field: "period",
+										field: "general",
 										message:
 											"There was an error processing your request",
 									},
@@ -490,6 +490,7 @@ const main = async (): Promise<void> => {
 					period,
 				}
 			);
+
 			if (!flaskResponse.data) {
 				throw new Error("Data not found");
 			} else {

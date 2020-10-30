@@ -60,7 +60,7 @@ const Forecast = () => {
 		}
 	};
 
-	const handleGASubmit = async (values: any, { setErrors }: any) => {
+	const handleGASubmit = async (values: any, setErrors: any) => {
 		const { viewId, metricId, metric, period, startDate, endDate } = values;
 		const postObj = {
 			viewId,
@@ -88,6 +88,12 @@ const Forecast = () => {
 		});
 
 		if (response.data?.errors) {
+			const generalError = response.data.errors.find(
+				(e: any) => e.field === "general"
+			);
+			if (generalError) {
+				setErrors("general", generalError.message);
+			}
 			console.log(response.data.errors);
 			setErrors(toErrorMap(response.data.errors));
 		} else if (response.data.forecast.length && response.data.actual.length) {
@@ -127,7 +133,7 @@ const Forecast = () => {
 							<GAForm
 								forecastData={forecastData}
 								handleSubmit={handleGASubmit}
-								//resetData={resetData}
+								resetData={resetData}
 							/>
 						</TabPanel>
 						<TabPanel>
