@@ -3,11 +3,20 @@ import { CSVUploadField } from "./CSVUploadField";
 import { CSVLink } from "react-csv";
 
 import { Box, Button, Link, Spinner, Text } from "@chakra-ui/core";
-import { Formik, Form } from "formik";
+import { Formik, Form, FormikErrors } from "formik";
 
 import { InputField } from "./InputField";
+
 interface CSVFormProps {
-	handleSubmit: (...args: any) => void;
+	handleSubmit: (
+		values: { file: File | null; period: number },
+		setErrors: (
+			errors: FormikErrors<{
+				file: null;
+				period: number;
+			}>
+		) => void
+	) => Promise<void>;
 
 	forecastData: object[];
 
@@ -40,15 +49,7 @@ export const CSVForm: React.FC<CSVFormProps> = ({ ...props }) => {
 					return (
 						<Form onSubmit={handleSubmit}>
 							<Box mt={4}>
-								<CSVUploadField
-									name="file"
-									label="File Upload"
-									//@ts-ignore
-									//value={values.file}
-									// onChange={(event: any) => {
-									// 	handleFileChange(event, setFieldValue);
-									// }}
-								/>
+								<CSVUploadField name="file" label="File Upload" />
 							</Box>
 							<Box mt={2}>
 								<Text fontSize="xs">

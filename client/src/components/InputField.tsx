@@ -18,11 +18,7 @@ export const InputField: React.FC<InputFieldProps> = ({ ...props }) => {
 	return (
 		<FormControl isInvalid={!!error}>
 			<FormLabel htmlFor={field.name}>{props.label}</FormLabel>
-			<Input
-				{...field}
-				// {...props}
-				id={field.name}
-			/>
+			<Input {...field} id={field.name} />
 			{error ? <FormErrorMessage>{error}</FormErrorMessage> : null}
 		</FormControl>
 	);

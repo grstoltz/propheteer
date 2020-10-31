@@ -5,13 +5,13 @@ import axios from "axios";
 import SEO from "react-seo-component";
 import ReactGA from "react-ga";
 
-import { toErrorMap } from "../utils/toErrorMap";
-
 import { Layout } from "../components/Layout";
-
-import Chart from "../components/Chart";
+import { Chart } from "../components/Chart";
 import { CSVForm } from "../components/CSVForm";
 import { GAForm } from "../components/GAForm";
+
+import { toErrorMap } from "../utils/toErrorMap";
+import { ServerError } from "../utils/types";
 
 const { useState } = React;
 
@@ -20,14 +20,18 @@ const Forecast = () => {
 	const [forecastData, setForecastData] = useState([]);
 
 	const handleCSVSubmit = async (
-		values: { file: File; period: number },
+		values: { file: File | null; period: number },
 		setErrors: (
 			errors: FormikErrors<{
 				file: null;
 				period: number;
 			}>
 		) => void
-	) => {
+	): Promise<void> => {
+		if (!values.file) {
+			setErrors({ file: "Please include a file." });
+			return;
+		}
 		const sendDate = new Date().getTime();
 		const file = values.file;
 		const period = values.period.toString();
@@ -89,12 +93,11 @@ const Forecast = () => {
 
 		if (response.data?.errors) {
 			const generalError = response.data.errors.find(
-				(e: any) => e.field === "general"
+				(e: ServerError) => e.field === "general"
 			);
 			if (generalError) {
 				setErrors("general", generalError.message);
 			}
-			console.log(response.data.errors);
 			setErrors(toErrorMap(response.data.errors));
 		} else if (response.data.forecast.length && response.data.actual.length) {
 			setForecastData(response.data.forecast);

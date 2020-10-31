@@ -3,7 +3,8 @@ import { Scatter } from "react-chartjs-2";
 
 interface data {
 	ds: string;
-	y: string;
+	y?: string;
+	yhat?: string;
 }
 
 interface ChartProps {
@@ -11,19 +12,22 @@ interface ChartProps {
 	actualData?: data[];
 }
 
-const Chart = (props: ChartProps) => {
+// interface ChartData {
+// 	x: string;
+// 	y: string;
+// }
+
+export const Chart = (props: ChartProps) => {
 	const { actualData, forecastData } = props;
 
-	const forecastDataArr: object[] | undefined = forecastData?.map(
-		(row: any) => {
-			return {
-				x: row.ds,
-				y: row.yhat,
-			};
-		}
-	);
+	const forecastDataArr = forecastData?.map((row: data) => {
+		return {
+			x: row.ds,
+			y: row.yhat,
+		};
+	});
 
-	const actualDataArr: object[] | undefined = actualData?.map((row: data) => {
+	const actualDataArr = actualData?.map((row: data) => {
 		return {
 			x: row.ds,
 			y: row.y,
@@ -98,5 +102,3 @@ const Chart = (props: ChartProps) => {
 	};
 	return <Scatter data={data} options={options} />;
 };
-
-export default Chart;

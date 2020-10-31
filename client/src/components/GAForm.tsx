@@ -5,20 +5,42 @@ import axios from "axios";
 import { CSVLink } from "react-csv";
 
 import { Link, Box, Button, Flex, Spinner, Image, Text } from "@chakra-ui/core";
-import { Formik, Form } from "formik";
+import { Formik, Form, FormikErrors } from "formik";
 
-import { SelectField } from "../components/SelectFieldv2";
+import { SelectField } from "./SelectField";
 import { InputField } from "../components/InputField";
 import { DatePickerField } from "../components/DatePickerField";
 
 import { yesterday, oneYear } from "../utils/dateHelper";
+import { Option } from "../utils/types";
 
 import googleButton from "../static/btn_google_signin_dark_normal_web@2x.png";
 
 const { useState } = React;
 
 interface GAFormProps {
-	handleSubmit: (...args: any) => void;
+	handleSubmit: (
+		values: {
+			account: string;
+			accountId: number;
+			property: string;
+			propertyId: number;
+			view: string;
+			viewId: number;
+			metric: string;
+			metricId: number;
+			startDate: string;
+			endDate: string;
+			period: number;
+			general: null;
+		},
+		setErrors: (
+			errors: FormikErrors<{
+				file: null;
+				period: number;
+			}>
+		) => void
+	) => Promise<void>;
 
 	forecastData: object[];
 
@@ -161,7 +183,7 @@ export const GAForm: React.FC<GAFormProps> = ({ ...props }) => {
 						handleReset,
 						setFieldValue,
 					} = props;
-					const handleAccountChange = async (option: any) => {
+					const handleAccountChange = async (option: Option) => {
 						const { label, value } = option;
 						if (value) {
 							setFieldValue("account", label);
@@ -179,7 +201,7 @@ export const GAForm: React.FC<GAFormProps> = ({ ...props }) => {
 						}
 					};
 
-					const handlePropertyChange = async (option: any) => {
+					const handlePropertyChange = async (option: Option) => {
 						const { label, value } = option;
 						if (value) {
 							setFieldValue("property", label);
@@ -192,7 +214,7 @@ export const GAForm: React.FC<GAFormProps> = ({ ...props }) => {
 							setFieldValue("view", "");
 						}
 					};
-					const handleViewChange = async (option: any) => {
+					const handleViewChange = async (option: Option) => {
 						const { label, value } = option;
 						if (value) {
 							setFieldValue("view", label);
@@ -207,7 +229,7 @@ export const GAForm: React.FC<GAFormProps> = ({ ...props }) => {
 							setFieldValue("metric", "");
 						}
 					};
-					const handleMetricChange = (option: any) => {
+					const handleMetricChange = (option: Option) => {
 						const { label, value } = option;
 						if (value) {
 							setFieldValue("metric", label);

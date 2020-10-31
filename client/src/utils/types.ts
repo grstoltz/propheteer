@@ -5,3 +5,13 @@ export interface FormikActions<Values> {
 		shouldValidate?: boolean
 	): void;
 }
+
+export interface ServerError {
+	message: string;
+	field: string;
+}
+
+export interface Option {
+	label: string;
+	value: string;
+}

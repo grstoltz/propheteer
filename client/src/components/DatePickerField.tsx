@@ -37,7 +37,6 @@ export const DatePickerField: React.FC<DatePickerFieldProps> = ({
 
 			<DatePicker
 				{...field}
-				// {...props}
 				onKeyDown={(e) => e.preventDefault()}
 				dateFormat={"yyyy/MM/dd"}
 				selected={(field.value && new Date(field.value)) || null}
