@@ -3,9 +3,9 @@ import { Link } from "react-router-dom";
 import { Text } from "@chakra-ui/core";
 
 interface MenuItemsProps {
-	children: any;
-	isLast?: any;
-	to: any;
+	children: React.ReactNode;
+	isLast?: boolean;
+	to: string;
 }
 
 export const MenuItems = (props: MenuItemsProps) => {
@@ -15,7 +15,6 @@ export const MenuItems = (props: MenuItemsProps) => {
 			mb={{ base: isLast ? 0 : 8, sm: 0 }}
 			mr={{ base: 0, sm: isLast ? 0 : 8 }}
 			display="block"
-			//{...rest}
 		>
 			<Link to={to}>{children}</Link>
 		</Text>
