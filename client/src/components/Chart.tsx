@@ -1,6 +1,8 @@
 import * as React from "react";
 import { Scatter } from "react-chartjs-2";
 
+import { ChartData, ChartTooltipItem } from "chart.js";
+
 interface data {
 	ds: string;
 	y?: string;
@@ -85,8 +87,16 @@ export const Chart = (props: ChartProps) => {
 		},
 		tooltips: {
 			callbacks: {
-				label: (tooltipItem: any, data: any) => {
-					let label = data.datasets[tooltipItem.datasetIndex].label || "";
+				label: (
+					tooltipItem: {
+						xLabel: number;
+						yLabel: number;
+						datasetIndex: number;
+					},
+					data: ChartData
+				) => {
+					let label =
+						data.datasets?.[tooltipItem.datasetIndex].label || "";
 
 					if (label) {
 						label += ":";
