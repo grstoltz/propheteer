@@ -1,6 +1,6 @@
 import * as React from "react";
 import { FormControl, FormErrorMessage, FormLabel } from "@chakra-ui/core";
-import { useField, FieldProps } from "formik";
+import { FieldProps, useField } from "formik";
 import Select from "react-select";
 
 import { Option } from "../utils/types";
